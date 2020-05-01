@@ -1,0 +1,38 @@
+{
+  "name": "metarhia",
+  "version": "0.0.1",
+  "author": "Timur Shemsedinov <timur.shemsedinov@gmail.com>",
+  "description": "Metarhia Starter Kit",
+  "license": "MIT",
+  "keywords": [
+    "metarhia",
+    "starter",
+    "kit",
+    "cloud",
+    "impress",
+    "nodejs"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/metarhia/StarterKit"
+  },
+  "bugs": {
+    "url": "https://github.com/metarhia/StarterKit/issues"
+  },
+  "homepage": "https://github.com/metarhia/StarterKit",
+  "main": "server.js",
+  "scripts": {
+    "test": "npm run -s lint",
+    "lint": "eslint ."
+  },
+  "engines": {
+    "node": ">=12.5.0"
+  },
+  "devDependencies": {
+    "eslint": "^6.8.0"
+  },
+  "dependencies": {
+    "pg": "^8.0.3",
+    "ws": "^7.2.5"
+  }
+}
