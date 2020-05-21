@@ -22,7 +22,7 @@
   "homepage": "https://github.com/metarhia/StarterKit",
   "main": "server.js",
   "scripts": {
-    "test": "npm run -s lint && node test/all.js",
+    "test": "npm run -s lint && node application/test/all.js",
     "lint": "eslint ."
   },
   "engines": {
