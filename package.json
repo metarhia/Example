@@ -32,7 +32,7 @@
     "eslint": "^7.0.0"
   },
   "dependencies": {
-    "impress": "^2.0.0-alpha.2",
+    "impress": "^2.0.0-alpha.3",
     "metatests": "^0.7.1"
   }
 }
