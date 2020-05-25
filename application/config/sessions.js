@@ -1,7 +1,7 @@
 ({
   // Sessions configuration
   anonymous: true, // Allow anonymous sessions
-  cookie: 'SID', // Session cookie name
+  sid: 'token', // Session tonek name
   characters: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789',
   secret: 'secret', // Session secret
   length: 64, // SID length in bytes
