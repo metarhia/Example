@@ -3,8 +3,6 @@
   cloud: 'PrivateCloud', // cloud name
   server: '1', // Server binary prefix Id
   instance: 'standalone', // cloud instance type: standalone, controller, server
-  key: '19nm58993eJ747845fk78A2z7854W90D', // Cloud access key
-  gc: 0, // garbage collector interval '1h' - 1 hour, '10m' - 10 minutes
-  watch: 3000, // combine wached file system events if in interval
-  shutdown: 5000,
+  key: 'ap14-me0b/6jtl9i:8d7$k8901d556*g', // Cloud access key
+  gc: 1 * 60 * 60 * 1000, // garbage collector interval
 });
