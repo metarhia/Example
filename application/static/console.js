@@ -2,8 +2,13 @@
 
 // API Builder
 
-const httpCall = (iname, ver, methodName, args) => {
-  const url = `/api/${iname}.${ver}/${methodName}`;
+const socket = new WebSocket('wss://' + location.host);
+
+const api = {};
+
+const httpCall = (iname, ver) => methodName => (args = {}) => {
+  const interfaceName = ver ? `${iname}.${ver}` : iname;
+  const url = `/api/${interfaceName}/${methodName}`;
   return fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -15,32 +20,35 @@ const httpCall = (iname, ver, methodName, args) => {
   });
 };
 
-const connect = async interfaces => {
-  const socket = new WebSocket('wss://' + location.host);
-  const api = {};
-  const introspection = await httpCall('system', '*', 'introspect', interfaces);
-  const available = Object.keys(introspection);
-  for (const interfaceName of interfaces) {
-    const [iname] = interfaceName.split('.');
-    if (!available.includes(iname)) continue;
-    const iface = introspection[iname];
-    const methodNames = Object.keys(iface);
-    for (const methodName of methodNames) {
-      api[iname][methodName] = (args = {}) => new Promise((resolve, reject) => {
-        const req = { interface: interfaceName, method: methodName, args };
-        socket.send(JSON.stringify(req));
-        socket.onmessage = event => {
-          const obj = JSON.parse(event.data);
-          if (obj.result !== 'error') resolve(obj);
-          else reject(new Error(`Status Code: ${obj.reason}`));
-        };
-      });
-    }
-  }
-  return api;
+const socketCall = (iname, ver) => methodName => (args = {}) => {
+  const interfaceName = ver ? `${iname}.${ver}` : iname;
+  return new Promise((resolve, reject) => {
+    const req = { interface: interfaceName, method: methodName, args };
+    socket.send(JSON.stringify(req));
+    socket.onmessage = event => {
+      const obj = JSON.parse(event.data);
+      if (obj.result !== 'error') resolve(obj);
+      else reject(new Error(`Status Code: ${obj.reason}`));
+    };
+  });
 };
 
-const api = connect(['auth', 'example']);
+api.load = async (...interfaces) => {
+  const introspect = httpCall('system')('introspect');
+  const introspection = await introspect(interfaces);
+  const available = Object.keys(introspection);
+  for (const interfaceName of interfaces) {
+    if (!available.includes(interfaceName)) continue;
+    const methods = {};
+    const iface = introspection[interfaceName];
+    const request = socketCall(interfaceName);
+    const methodNames = Object.keys(iface);
+    for (const methodName of methodNames) {
+      methods[methodName] = request(methodName);
+    }
+    api[interfaceName] = methods;
+  }
+};
 
 // Console Emulation
 
@@ -270,8 +278,7 @@ document.onkeypress = event => {
 
 const exec = async line => {
   const args = line.split(' ');
-  const cmd = args.shift();
-  const data = await api.cms[cmd](args);
+  const data = await api.cms.content(args);
   print(data);
   commandLoop();
 };
@@ -285,10 +292,12 @@ function commandLoop() {
 
 const signIn = async () => {
   try {
+    await api.load('auth');
     await api.auth.status();
   } catch (err) {
     await api.auth.signIn({ login: 'marcus', password: 'marcus' });
   }
+  await api.load('example');
 };
 
 window.addEventListener('load', () => {
