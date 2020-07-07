@@ -1,56 +1,7 @@
-'use strict';
+import { Metacom } from './metacom.js';
 
-// API Builder
-
-const socket = new WebSocket('wss://' + location.host);
-
-const api = {};
-
-const httpCall = (iname, ver) => methodName => (args = {}) => {
-  const interfaceName = ver ? `${iname}.${ver}` : iname;
-  const url = `/api/${interfaceName}/${methodName}`;
-  return fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(args),
-  }).then(res => {
-    const { status } = res;
-    if (status === 200) return res.json();
-    throw new Error(`Status Code: ${status}`);
-  });
-};
-
-const socketCall = (iname, ver) => methodName => (args = {}) => {
-  const interfaceName = ver ? `${iname}.${ver}` : iname;
-  return new Promise((resolve, reject) => {
-    const req = { interface: interfaceName, method: methodName, args };
-    socket.send(JSON.stringify(req));
-    socket.onmessage = event => {
-      const obj = JSON.parse(event.data);
-      if (obj.result !== 'error') resolve(obj);
-      else reject(new Error(`Status Code: ${obj.reason}`));
-    };
-  });
-};
-
-api.load = async (...interfaces) => {
-  const introspect = httpCall('system')('introspect');
-  const introspection = await introspect(interfaces);
-  const available = Object.keys(introspection);
-  for (const interfaceName of interfaces) {
-    if (!available.includes(interfaceName)) continue;
-    const methods = {};
-    const iface = introspection[interfaceName];
-    const request = socketCall(interfaceName);
-    const methodNames = Object.keys(iface);
-    for (const methodName of methodNames) {
-      methods[methodName] = request(methodName);
-    }
-    api[interfaceName] = methods;
-  }
-};
-
-// Console Emulation
+const metacom = new Metacom(location.host);
+const { api } = metacom;
 
 const ALPHA_UPPER = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 const ALPHA_LOWER = 'abcdefghijklmnopqrstuvwxyz';
@@ -292,12 +243,12 @@ function commandLoop() {
 
 const signIn = async () => {
   try {
-    await api.load('auth');
+    await metacom.load('auth');
     await api.auth.status();
   } catch (err) {
     await api.auth.signIn({ login: 'marcus', password: 'marcus' });
   }
-  await api.load('example');
+  await metacom.load('example');
 };
 
 window.addEventListener('load', () => {
