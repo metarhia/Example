@@ -2,6 +2,26 @@ export class Metacom {
   constructor(host) {
     this.socket = new WebSocket('wss://' + host);
     this.api = {};
+    this.callId = 0;
+    this.calls = new Map();
+    this.socket.onmessage = ({ data }) => {
+      try {
+        const packet = JSON.parse(data);
+        const { callback, event } = packet;
+        const callId = callback || event;
+        const [resolve, reject] = this.calls.get(callId);
+        if (packet.error) {
+          const { code, message } = packet.error;
+          const error = new Error(message);
+          error.code = code;
+          reject(error);
+          return;
+        }
+        resolve(packet.result);
+      } catch (err) {
+        console.error(err);
+      }
+    };
   }
 
   async load(...interfaces) {
@@ -39,15 +59,13 @@ export class Metacom {
 
   socketCall(iname, ver) {
     return methodName => (args = {}) => {
+      const callId = ++this.callId;
       const interfaceName = ver ? `${iname}.${ver}` : iname;
+      const target = interfaceName + '/' + methodName;
       return new Promise((resolve, reject) => {
-        const req = { interface: interfaceName, method: methodName, args };
-        this.socket.send(JSON.stringify(req));
-        this.socket.onmessage = event => {
-          const obj = JSON.parse(event.data);
-          if (obj.result !== 'error') resolve(obj);
-          else reject(new Error(`Status Code: ${obj.reason}`));
-        };
+        this.calls.set(callId, [resolve, reject]);
+        const packet = { call: callId, [target]: args };
+        this.socket.send(JSON.stringify(packet));
       });
     };
   }
