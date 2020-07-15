@@ -33,6 +33,6 @@
     "metatests": "^0.7.1"
   },
   "dependencies": {
-    "impress": "^2.0.0-alpha.6"
+    "impress": "^2.0.0-alpha.7"
   }
 }
