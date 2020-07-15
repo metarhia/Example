@@ -43,15 +43,17 @@ export class Metacom {
 
   httpCall(iname, ver) {
     return methodName => (args = {}) => {
+      const callId = ++this.callId;
       const interfaceName = ver ? `${iname}.${ver}` : iname;
-      const url = `/api/${interfaceName}/${methodName}`;
-      return fetch(url, {
+      const target = interfaceName + '/' + methodName;
+      const packet = { call: callId, [target]: args };
+      return fetch('/api', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(args),
+        body: JSON.stringify(packet),
       }).then(res => {
         const { status } = res;
-        if (status === 200) return res.json();
+        if (status === 200) return res.json().then(({ result }) => result);
         throw new Error(`Status Code: ${status}`);
       });
     };
