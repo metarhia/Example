@@ -1,10 +1,4 @@
 {
-  "rules": {
-    "strict": [
-      "error",
-      "never"
-    ]
-  },
   "globals": {
     "application": "readonly",
     "context": "readonly",
