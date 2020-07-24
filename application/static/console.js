@@ -2,6 +2,7 @@ import { Metacom } from './metacom.js';
 
 const metacom = new Metacom(location.host);
 const { api } = metacom;
+window.api = api;
 
 const ALPHA_UPPER = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 const ALPHA_LOWER = 'abcdefghijklmnopqrstuvwxyz';

@@ -4,7 +4,7 @@ export class Metacom {
     this.api = {};
     this.callId = 0;
     this.calls = new Map();
-    this.socket.onmessage = ({ data }) => {
+    this.socket.addEventListener('message', ({ data }) => {
       try {
         const packet = JSON.parse(data);
         const { callback, event } = packet;
@@ -21,7 +21,14 @@ export class Metacom {
       } catch (err) {
         console.error(err);
       }
-    };
+    });
+  }
+
+  ready() {
+    return new Promise(resolve => {
+      if (this.socket.readyState === WebSocket.OPEN) resolve();
+      else this.socket.addEventListener('open', resolve);
+    });
   }
 
   async load(...interfaces) {
@@ -60,10 +67,11 @@ export class Metacom {
   }
 
   socketCall(iname, ver) {
-    return methodName => (args = {}) => {
+    return methodName => async (args = {}) => {
       const callId = ++this.callId;
       const interfaceName = ver ? `${iname}.${ver}` : iname;
       const target = interfaceName + '/' + methodName;
+      await this.ready();
       return new Promise((resolve, reject) => {
         this.calls.set(callId, [resolve, reject]);
         const packet = { call: callId, [target]: args };
