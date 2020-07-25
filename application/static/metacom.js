@@ -9,7 +9,9 @@ export class Metacom {
         const packet = JSON.parse(data);
         const { callback, event } = packet;
         const callId = callback || event;
-        const [resolve, reject] = this.calls.get(callId);
+        const promised = this.calls.get(callId);
+        if (!promised) return;
+        const [resolve, reject] = promised;
         if (packet.error) {
           const { code, message } = packet.error;
           const error = new Error(message);
