@@ -10,7 +10,7 @@ export class Metacom {
         const { callback, event } = packet;
         const callId = callback || event;
         const promised = this.calls.get(callId);
-        if (!promised) return
+        if (!promised) return;
         const [resolve, reject] = promised;
         if (packet.error) {
           const { code, message } = packet.error;
