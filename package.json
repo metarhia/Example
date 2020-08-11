@@ -1,8 +1,8 @@
 {
   "name": "metarhia",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "author": "Timur Shemsedinov <timur.shemsedinov@gmail.com>",
-  "description": "Metarhia Starter Kit",
+  "description": "Metarhia Application Example",
   "license": "MIT",
   "keywords": [
     "metarhia",
@@ -10,29 +10,50 @@
     "kit",
     "cloud",
     "impress",
-    "nodejs"
+    "nodejs",
+    "example",
+    "websocket",
+    "api",
+    "application",
+    "server",
+    "rpc",
+    "soa",
+    "service",
+    "stateful",
+    "rest",
+    "restful",
+    "web",
+    "framework",
+    "router",
+    "routing",
+    "cluster",
+    "cache",
+    "http",
+    "https",
+    "websockets"
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/metarhia/StarterKit"
+    "url": "https://github.com/metarhia/Example"
   },
   "bugs": {
-    "url": "https://github.com/metarhia/StarterKit/issues"
+    "url": "https://github.com/metarhia/Example/issues"
   },
-  "homepage": "https://github.com/metarhia/StarterKit",
+  "homepage": "https://github.com/metarhia/Example",
   "main": "server.js",
   "scripts": {
     "test": "npm run -s lint && node application/test/all.js",
     "lint": "eslint ."
   },
   "engines": {
-    "node": ">=12.5.0"
+    "node": ">=12.9.0"
   },
   "devDependencies": {
-    "eslint": "^7.3.1",
-    "metatests": "^0.7.1"
+    "eslint": "^7.6.0",
+    "metatests": "^0.7.2",
+    "@types/node": "^14.0.27"
   },
   "dependencies": {
-    "impress": "^2.0.0-alpha.7"
+    "impress": "^2.0.0-alpha.9"
   }
 }
