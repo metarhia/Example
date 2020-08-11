@@ -49,11 +49,11 @@
     "node": ">=12.9.0"
   },
   "devDependencies": {
-    "eslint": "^7.3.1",
-    "metatests": "^0.7.1",
-    "@types/node": "^14.0.27",
+    "eslint": "^7.6.0",
+    "metatests": "^0.7.2",
+    "@types/node": "^14.0.27"
   },
   "dependencies": {
-    "impress": "^2.0.0-alpha.8"
+    "impress": "^2.0.0-alpha.9"
   }
 }
