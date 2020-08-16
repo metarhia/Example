@@ -1,5 +1,5 @@
 ({
-  async start(config) {
+  async start() {
     console.log('Start example plugin');
     console.log(this.config);
   },
