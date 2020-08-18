@@ -2,11 +2,11 @@
   async start() {
     const { interval } = this.config;
     setInterval(() => {
-      const stats = application.resmon.getStatistics();
+      const stats = lib.resmon.getStatistics();
       const { heapTotal, heapUsed, external, contexts, detached } = stats;
-      const total = application.utils.bytesToSize(heapTotal);
-      const used = application.utils.bytesToSize(heapUsed);
-      const ext = application.utils.bytesToSize(external);
+      const total = lib.utils.bytesToSize(heapTotal);
+      const used = lib.utils.bytesToSize(heapUsed);
+      const ext = lib.utils.bytesToSize(external);
       console.log(`Heap: ${used} of ${total}, ext: ${ext}`);
       console.log(`Contexts: ${contexts}, detached: ${detached}`);
     }, interval);

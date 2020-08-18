@@ -1,7 +1,7 @@
 ({
   async start() {
     console.log('Start example plugin');
-    console.log(this.config);
+    console.log(lib.example.config);
   },
 
   async stop() {
