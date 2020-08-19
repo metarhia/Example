@@ -54,7 +54,7 @@
     "metatests": "^0.7.2"
   },
   "dependencies": {
-    "impress": "^2.0.0-alpha.13",
+    "impress": "^2.0.0-alpha.15",
     "pg": "^8.3.2"
   }
 }
