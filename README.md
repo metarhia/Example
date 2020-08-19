@@ -1,4 +1,4 @@
-# Metarhia Starter Kit for Node.js Server
+# Metarhia Technology Stack Example Server for Node.js
 
 ## Concept
 
@@ -24,8 +24,9 @@ let's start with
 
 ## Feature list
 
-- Serve API with routing, HTTP(S), WS(S)
+- Serve API with auto routing, HTTP(S), WS(S)
 - Server code live reload with file system watch
+- Auto dependency loader and plugins
 - Graceful shutdown and application reload
 - Minimum code size and dependencies
 - Code sandboxing for security and context isolation
