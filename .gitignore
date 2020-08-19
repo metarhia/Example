@@ -1,6 +1,5 @@
 node_modules
 /log/
 *.log
-*.pem
 *.done
 .DS_Store
