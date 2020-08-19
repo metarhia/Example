@@ -1,7 +1,7 @@
 ({
   Database: class Database {
     constructor(config) {
-      this.pool = new api.pg.Pool(config);
+      this.pool = new npm.pg.Pool(config);
     }
 
     query(sql, values) {
@@ -56,5 +56,5 @@
     close() {
       this.pool.end();
     }
-  },
+  }
 });

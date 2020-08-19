@@ -1,5 +1,5 @@
 async () => {
-  const loadavg = api.os.loadavg();
+  const loadavg = node.os.loadavg();
   const stats = lib.resmon.getStatistics();
   const { heapTotal, heapUsed, external, contexts } = stats;
   const total = lib.utils.bytesToSize(heapTotal);

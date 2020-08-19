@@ -2,7 +2,8 @@
   "globals": {
     "application": "readonly",
     "context": "readonly",
-    "api": "readonly",
+    "node": "readonly",
+    "npm": "readonly",
     "lib": "readonly",
     "domain": "readonly"
   }
