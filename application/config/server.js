@@ -1,10 +1,15 @@
 ({
   host: '127.0.0.1',
-  ports: [8000, 8001, 8002, 8003],
+  http: [8000],
+  https: [8001, 8002],
   timeout: 5000,
   concurrency: 1000,
   queue: {
     size: 2000,
+    timeout: 3000,
+  },
+  workers: {
+    pool: 2,
     timeout: 3000,
   }
 });
