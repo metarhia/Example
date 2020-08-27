@@ -1,7 +1,8 @@
 ({
   host: '127.0.0.1',
-  http: [8000],
-  https: [8001, 8002],
+  balancer: 8000,
+  protocol: 'http',
+  ports: [8001, 8002],
   timeout: 5000,
   concurrency: 1000,
   queue: {
