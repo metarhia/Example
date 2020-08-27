@@ -1,6 +1,7 @@
 import { Metacom } from './metacom.js';
 
-const metacom = new Metacom(location.host);
+const protocol = location.protocol === 'http:' ? 'ws' : 'wss';
+const metacom = new Metacom(`${protocol}://${location.host}`);
 const { api } = metacom;
 window.api = api;
 
