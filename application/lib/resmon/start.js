@@ -7,5 +7,5 @@
     const ext = lib.utils.bytesToSize(external);
     console.log(`Heap: ${used} of ${total}, ext: ${ext}`);
     console.log(`Contexts: ${contexts}, detached: ${detached}`);
-  }, lib.resmon.config.interval);
+  }, config.resmon.interval);
 });

@@ -1,6 +1,6 @@
 (async () => {
   console.log('Connect to metacom');
-  const { url } = domain.remote.config;
+  const { url } = config.remote;
   const Metacom = npm.metacom;
   const metacom = new Metacom(url);
   domain.remote.metacom = metacom;
