@@ -1,4 +1,4 @@
 (async () => {
-  console.log('Connect to PG');
+  console.debug('Connect to pg');
   domain.database.example = new lib.pg.Database(config.database);
 });

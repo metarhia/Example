@@ -1,3 +1,3 @@
 (() => {
-  console.log('Call method: example.doSomething');
+  console.debug('Call method: example.doSomething');
 });

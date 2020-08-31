@@ -1,3 +1,3 @@
 (() => {
-  console.log('Call method: example.submodule2.nested1.method1');
+  console.debug('Call method: example.submodule2.nested1.method1');
 });

@@ -1,7 +1,7 @@
 ({
   access: 'public',
   method: async ({ ...args }) => {
-    console.log({ webHook: args });
+    console.debug({ webHook: args });
     return { result: 'success' };
   }
 });

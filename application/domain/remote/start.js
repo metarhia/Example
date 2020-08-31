@@ -1,5 +1,5 @@
 (async () => {
-  console.log('Connect to metacom');
+  console.debug('Connect to metacom');
   const { url } = config.remote;
   const Metacom = npm.metacom;
   const metacom = new Metacom(url);

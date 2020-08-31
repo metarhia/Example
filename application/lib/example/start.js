@@ -1,4 +1,4 @@
 (async () => {
-  console.log('Start example plugin');
-  console.log(config.example);
+  console.debug('Start example plugin');
+  console.debug(config.example);
 });
