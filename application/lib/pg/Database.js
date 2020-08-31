@@ -5,7 +5,7 @@
 
   query(sql, values) {
     const data = values ? values.join(',') : '';
-    console.log(`${sql}\t[${data}]`);
+    console.debug(`${sql}\t[${data}]`);
     return this.pool.query(sql, values);
   }
 

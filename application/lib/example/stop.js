@@ -1,3 +1,3 @@
 (async () => {
-  console.log('Stop example plugin');
+  console.debug('Stop example plugin');
 });

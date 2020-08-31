@@ -1,7 +1,7 @@
 ({
   access: 'public',
   method: async ({ ...args }) => {
-    console.log({ remoteMethod: args });
+    console.debug({ remoteMethod: args });
     return { result: 'success' };
   }
 });
