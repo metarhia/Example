@@ -1,3 +1,10 @@
+class MetacomError extends Error {
+  constructor(message, code) {
+    super(message);
+    this.code = code;
+  }
+}
+
 export class Metacom {
   constructor(url) {
     this.url = url;
@@ -14,9 +21,8 @@ export class Metacom {
         if (!promised) return;
         const [resolve, reject] = promised;
         if (packet.error) {
-          const { code, message } = packet.error;
-          const error = new Error(message);
-          error.code = code;
+          const { message, code } = packet.error;
+          const error = new MetacomError(message, code);
           reject(error);
           return;
         }
