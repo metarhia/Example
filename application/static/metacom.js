@@ -47,7 +47,7 @@ export class Metacom {
     const callId = packet[callType];
     const args = packet[target];
     if (callId && args) {
-      if (callType === 'call') {
+      if (callType === 'callback') {
         const promised = this.calls.get(callId);
         if (!promised) return;
         const [resolve, reject] = promised;
