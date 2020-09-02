@@ -5,6 +5,24 @@ class MetacomError extends Error {
   }
 }
 
+class MetacomInterface {
+  constructor() {
+    this._events = new Map();
+  }
+
+  on(name, fn) {
+    const event = this._events.get(name);
+    if (event) event.add(fn);
+    else this._events.set(name, new Set([fn]));
+  }
+
+  emit(name, ...args) {
+    const event = this._events.get(name);
+    if (!event) return;
+    for (const fn of event.values()) fn(...args);
+  }
+}
+
 export class Metacom {
   constructor(url) {
     this.url = url;
@@ -13,10 +31,23 @@ export class Metacom {
     this.callId = 0;
     this.calls = new Map();
     this.socket.addEventListener('message', ({ data }) => {
-      try {
-        const packet = JSON.parse(data);
-        const { callback, event } = packet;
-        const callId = callback || event;
+      this.message(data);
+    });
+  }
+
+  message(data) {
+    let packet;
+    try {
+      packet = JSON.parse(data);
+    } catch (err) {
+      console.error(err);
+      return;
+    }
+    const [callType, target] = Object.keys(packet);
+    const callId = packet[callType];
+    const args = packet[target];
+    if (callId && args) {
+      if (callType === 'callback') {
         const promised = this.calls.get(callId);
         if (!promised) return;
         const [resolve, reject] = promised;
@@ -26,11 +57,15 @@ export class Metacom {
           reject(error);
           return;
         }
-        resolve(packet.result);
-      } catch (err) {
-        console.error(err);
+        resolve(args);
+        return;
       }
-    });
+      if (callType === 'event') {
+        const [interfaceName, eventName] = target.split('/');
+        const metacomInterface = this.api[interfaceName];
+        metacomInterface.emit(eventName, args);
+      }
+    }
   }
 
   ready() {
@@ -46,7 +81,7 @@ export class Metacom {
     const available = Object.keys(introspection);
     for (const interfaceName of interfaces) {
       if (!available.includes(interfaceName)) continue;
-      const methods = {};
+      const methods = new MetacomInterface();
       const iface = introspection[interfaceName];
       const request = this.socketCall(interfaceName);
       const methodNames = Object.keys(iface);
