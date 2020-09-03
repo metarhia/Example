@@ -251,6 +251,8 @@ const signIn = async () => {
     await api.auth.signIn({ login: 'marcus', password: 'marcus' });
   }
   await metacom.load('example');
+  api.example.on('resmon', data => print(JSON.stringify(data)));
+  api.example.subscribe();
 };
 
 window.addEventListener('load', () => {
