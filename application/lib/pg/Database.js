@@ -1,6 +1,6 @@
 (class Database {
-  constructor(config) {
-    this.pool = new npm.pg.Pool(config);
+  constructor(options) {
+    this.pool = new npm.pg.Pool(options);
   }
 
   query(sql, values) {
