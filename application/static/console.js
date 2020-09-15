@@ -229,10 +229,60 @@ document.onkeypress = event => {
   }
 };
 
+const blobToBase64 = blob => {
+  const reader = new FileReader();
+  reader.readAsDataURL(blob);
+  return new Promise(resolve => {
+    reader.onloadend = () => {
+      resolve(reader.result);
+    };
+  });
+};
+
+const uploadFile = (file, done) => {
+  blobToBase64(file)
+    .then(url => {
+      const data = url.substring(url.indexOf(',') + 1);
+      api.example.uploadFile({ name: file.name, data }).then(done);
+    });
+};
+
+const upload = () => {
+  const element = document.createElement('form');
+  element.style.visibility = 'hidden';
+  element.innerHTML = '<input id="fileSelect" type="file" multiple />';
+  document.body.appendChild(element);
+  const fileSelect = document.getElementById('fileSelect');
+  fileSelect.click();
+  fileSelect.onchange = () => {
+    const files = Array.from(fileSelect.files);
+    print('Uploading ' + files.length + ' file(s)');
+    files.sort((a, b) => a.size - b.size);
+    let i = 0;
+    const uploadNext = () => {
+      const file = files[i];
+      uploadFile(file, () => {
+        print(`name: ${file.name}, size: ${file.size} done`);
+        i++;
+        if (i < files.length) {
+          return uploadNext();
+        }
+        document.body.removeChild(element);
+        commandLoop();
+      });
+    };
+    uploadNext();
+  };
+};
+
 const exec = async line => {
   const args = line.split(' ');
-  const data = await api.cms.content(args);
-  print(data);
+  if (args[0] === 'upload') {
+    upload();
+  } else {
+    const data = await api.cms.content(args);
+    print(data);
+  }
   commandLoop();
 };
 
