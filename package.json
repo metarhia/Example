@@ -55,7 +55,6 @@
   },
   "dependencies": {
     "impress": "^2.0.0-alpha.28",
-    "metacom": "0.1.0-alpha.7",
     "pg": "^8.3.3"
   }
 }
