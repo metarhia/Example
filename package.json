@@ -42,7 +42,7 @@
   "homepage": "https://github.com/metarhia/Example",
   "main": "server.js",
   "scripts": {
-    "test": "npm run -s lint && node application/test/all.js",
+    "test": "npm run -s lint && node test/system.js",
     "lint": "eslint ."
   },
   "engines": {
