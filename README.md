@@ -1,4 +1,7 @@
-# Metarhia Technology Stack Example Server for Node.js
+# Metarhia Example Server for Node.js
+
+[![travis](https://travis-ci.org/metarhia/impress.svg?branch=master)](https://travis-ci.org/metarhia/Example)
+[![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/metarhia/Example/blob/master/LICENSE)
 
 ## Concept
 
