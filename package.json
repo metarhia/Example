@@ -1,6 +1,6 @@
 {
   "name": "metarhia",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "author": "Timur Shemsedinov <timur.shemsedinov@gmail.com>",
   "description": "Metarhia Application Example",
   "license": "MIT",
@@ -49,12 +49,12 @@
     "node": ">=12.9.0"
   },
   "devDependencies": {
-    "@types/node": "^14.11.2",
-    "eslint": "^7.9.0",
+    "@types/node": "^14.14.2",
+    "eslint": "^7.11.0",
     "metatests": "^0.7.2"
   },
   "dependencies": {
-    "impress": "^2.0.0-alpha.28",
-    "pg": "^8.3.3"
+    "impress": "^2.0.0-alpha.29",
+    "pg": "^8.4.1"
   }
 }
