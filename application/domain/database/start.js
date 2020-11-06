@@ -1,4 +1,5 @@
 (async () => {
   console.debug('Connect to pg');
-  domain.database.example = new lib.pg.Database(config.database);
+  const options = { ...config.database, logger: console };
+  domain.db = new npm.metasql.Database(options);
 });
