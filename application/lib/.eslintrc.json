@@ -11,6 +11,7 @@
     "node": "readonly",
     "npm": "readonly",
     "lib": "readonly",
-    "domain": "readonly"
+    "domain": "readonly",
+    "metarhia": "readonly"
   }
 }
