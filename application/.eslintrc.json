@@ -11,7 +11,8 @@
       "api",
       "lib",
       "domain",
-      "config"
+      "config",
+      "metarhia"
     ]
   }
 }
