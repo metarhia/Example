@@ -1,8 +1,9 @@
 import { Metacom } from './metacom.js';
 
 const protocol = location.protocol === 'http:' ? 'ws' : 'wss';
-const metacom = new Metacom(`${protocol}://${location.host}`);
+const metacom = Metacom.create(`${protocol}://${location.host}/api`);
 const { api } = metacom;
+window.metacom = metacom;
 window.api = api;
 
 const ALPHA_UPPER = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
