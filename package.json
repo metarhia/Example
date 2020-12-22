@@ -1,6 +1,6 @@
 {
   "name": "metarhia",
-  "version": "0.0.11",
+  "version": "1.0.0",
   "author": "Timur Shemsedinov <timur.shemsedinov@gmail.com>",
   "description": "Metarhia Application Example",
   "license": "MIT",
@@ -54,6 +54,6 @@
     "metatests": "^0.7.2"
   },
   "dependencies": {
-    "impress": "^2.0.0-alpha.37"
+    "impress": "^2.0.0"
   }
 }
