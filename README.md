@@ -58,11 +58,11 @@ let's start with
 - Start your project modifying this starter kit
 - Before running server initialize the DB:
   - First of all, make sure you have PostgreSQL installed.
-  - Create new user and database for the application:
+  - Create new user and database for the application:  
     `psql -f application/db/install.sql -U postgres`
-  - Initialize database structure:
+  - Initialize database structure:  
     `PGPASSWORD=marcus psql -d application -f application/db/structure.sql -U marcus`
-  - Initialize database data:
+  - Initialize database data:  
     `PGPASSWORD=marcus psql -d application -f application/db/data.sql -U marcus`
 - Run project: `node server.js` and stop with Ctrl+C
 - Ask questions in https://t.me/nodeua and post issues on
@@ -70,5 +70,5 @@ let's start with
 
 ## License
 
-Copyright (c) 2020 Metarhia contributors.
+Copyright (c) 2020-2021 Metarhia contributors.
 This starter kit is [MIT licensed](./LICENSE).
