@@ -1,4 +1,7 @@
-async ({ key, value }) => {
-  const result = await lib.redis.set(key, value);
-  return { result };
-};
+({
+  access: 'public',
+  method: async ({ key, value }) => {
+    const result = await lib.redis.set(key, value);
+    return { result };
+  }
+});
