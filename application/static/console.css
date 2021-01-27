@@ -11,8 +11,8 @@ a, a * {
 html, body {
   padding: 0;
   margin: 0;
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 11pt;
+  font-family: 'Share Tech Mono';
+  font-size: 12pt;
   overflow: hidden;
   height: 100%;
   background: #000;
@@ -20,6 +20,35 @@ html, body {
 }
 body {
   height: 100%;
+}
+a {
+  background: #7FD900;
+  color: #000;
+  padding: 1px 4px;
+  margin: 1px 0;
+  border: 0px;
+  font-family: 'Share Tech Mono';
+  font-size: 12pt;
+  transition-duration: 0.4s;
+  display: inline-block;
+}
+a.mail {
+  background: #FF7777;
+}
+a.web {
+  background: #3399FF;
+}
+a.base {
+  background: #F2F200;
+}
+a.partnership {
+  background: #FF6600;
+}
+a.services {
+  background: #009933;
+}
+a:hover {
+  background: #FFFFFF;
 }
 input, textarea {
   -webkit-border-radius: 0;
@@ -69,8 +98,11 @@ ul,ol {
   position: absolute;
   left: 8px;
   right: 8px;
-  top: 8px;
+  top: 0;
   bottom: 0;
+}
+#colsoleIndent {
+  height: 75px;
 }
 #panelScroll {
   height: 100%;
@@ -89,11 +121,12 @@ ul,ol {
   height: 25pt;
 }
 #controlShadow {
+  background: #000;
   position: absolute;
-  top: -10px;
+  top: 0;
   left: 0;
   right: 0;
-  height: 10px;
+  height: 68px;
   box-shadow: 0px 0px 20px 6px rgba(0,0,0,1);
   z-index: 1;
 }
@@ -155,4 +188,8 @@ ul,ol {
 }
 #controlBrowseSpacer {
   height: 100%;
+}
+.header {
+  color: #fff;
+  font-weight: bold;
 }

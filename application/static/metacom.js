@@ -45,6 +45,8 @@ export class Metacom extends EventEmitter {
     this.api = {};
     this.callId = 0;
     this.calls = new Map();
+    this.streams = new Map();
+    this.currentStream = null;
     this.active = false;
     this.connected = false;
     this.lastActivity = new Date().getTime();
@@ -89,6 +91,24 @@ export class Metacom extends EventEmitter {
         const metacomInterface = this.api[interfaceName];
         metacomInterface.emit(eventName, args);
       }
+      if (callType === 'stream') {
+        const { name, size, status } = packet;
+        if (name) {
+          const stream = { name, size, chunks: [], received: 0 };
+          this.streams.set(callId, stream);
+          return;
+        }
+        const stream = this.streams.get(callId);
+        if (status) {
+          this.streams.delete(callId);
+          const blob = new Blob(stream.chunks);
+          blob.text().then((text) => {
+            console.log({ text });
+          });
+          return;
+        }
+        this.currentStream = stream;
+      }
     }
   }
 
@@ -110,7 +130,7 @@ export class Metacom extends EventEmitter {
   }
 
   scaffold(iname, ver) {
-    return methodName => async (args = {}) => {
+    return (methodName) => async (args = {}) => {
       const callId = ++this.callId;
       const interfaceName = ver ? `${iname}.${ver}` : iname;
       const target = interfaceName + '/' + methodName;
@@ -139,7 +159,13 @@ class WebsocketTransport extends Metacom {
     connections.add(this);
 
     socket.addEventListener('message', ({ data }) => {
-      this.message(data);
+      if (typeof data === 'string') {
+        this.message(data);
+        return;
+      }
+      if (!this.currentStream) return;
+      this.currentStream.chunks.push(data);
+      this.currentStream = null;
     });
 
     socket.addEventListener('close', () => {
@@ -160,7 +186,7 @@ class WebsocketTransport extends Metacom {
       }
     }, this.pingInterval);
 
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       socket.addEventListener('open', () => {
         this.connected = true;
         resolve();
@@ -200,10 +226,10 @@ class HttpTransport extends Metacom {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: data,
-    }).then(res => {
+    }).then((res) => {
       const { status } = res;
       if (status === 200) {
-        return res.text().then(packet => {
+        return res.text().then((packet) => {
           if (packet.error) throw new MetacomError(packet.error);
           this.message(packet);
         });
