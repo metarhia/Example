@@ -4,18 +4,18 @@
     <title>Metarhia Console</title>
     <meta charset="utf-8">
     <meta http-equiv="Content-Security-Policy" content="connect-src 'self' wss:; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com">
-    <link rel="manifest" href="/manifest.json">
-    <link rel="stylesheet" href="/console.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="console.css">
     <script src="console.js" type="module"></script>
     <meta name="HandheldFriendly" content="true" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
-    <link rel="apple-touch-icon-precomposed" href="/favicon.png" />
+    <link rel="apple-touch-icon-precomposed" href="favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no" />
     <meta name="format-detection" content="telephone=no">
-    <link rel="shortcut icon" href="./favicon.ico" type="image/vnd.microsoft.icon" />
-    <link rel="icon" href="./favicon.ico" type="image/vnd.microsoft.icon" />
-    <link rel="apple-touch-icon" href="/favicon.png" />
+    <link rel="shortcut icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
+    <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
+    <link rel="apple-touch-icon" href="favicon.png" />
     <link href='https://fonts.googleapis.com/css?family=Share+Tech+Mono' rel='stylesheet' type='text/css'>
   </head>
 <body>
@@ -40,9 +40,11 @@
       <div id="controlScroll"></div>
     </div>
     <div id="panelConsole">
-      <div id="controlShadow"></div>
+      <div id="controlShadow">
+        <div><img width="240" src="./metarhia.svg" /></div>
+      </div>
       <div id="controlBrowse">
-        <div><img width="200" src="./metarhia.svg" /></div>
+        <div id="colsoleIndent"></div>
         <div id="controlInput"></div>
       </div>
       <div id="controlKeyboard"></div>

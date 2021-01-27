@@ -1,173 +1,184 @@
 import { Metacom } from './metacom.js';
 
-const protocol = location.protocol === 'http:' ? 'ws' : 'wss';
-const metacom = Metacom.create(`${protocol}://${location.host}/api`);
-const { api } = metacom;
-window.metacom = metacom;
-window.api = api;
-
 const ALPHA_UPPER = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 const ALPHA_LOWER = 'abcdefghijklmnopqrstuvwxyz';
 const ALPHA = ALPHA_UPPER + ALPHA_LOWER;
 const DIGIT = '0123456789';
 const CHARS = ALPHA + DIGIT;
-const TIME_LINE = 300;
-const TIME_CHAR = 20;
+const TIME_CHAR = 5;
 
 const KEY_CODE = {
-  BACKSPACE: 8, TAB: 9, ENTER: 13, PAUSE: 19, ESC: 27, SPACE: 32,
-  PGUP: 33, PGDN: 34, END: 35, HOME: 36,
-  LT: 37, UP: 38, RT: 39, DN: 40, INS: 45, DEL: 46,
-  F1: 112, F2: 113, F3: 114, F4: 115, F5: 116, F6: 117,
-  F7: 118, F8: 119, F9: 120, F10: 121, F11: 122, F12: 123,
+  BACKSPACE: 8,
+  TAB: 9,
+  ENTER: 13,
+  PAUSE: 19,
+  ESC: 27,
+  SPACE: 32,
+  PGUP: 33,
+  PGDN: 34,
+  END: 35,
+  HOME: 36,
+  LT: 37,
+  UP: 38,
+  RT: 39,
+  DN: 40,
+  INS: 45,
+  DEL: 46,
+  F1: 112,
+  F2: 113,
+  F3: 114,
+  F4: 115,
+  F5: 116,
+  F6: 117,
+  F7: 118,
+  F8: 119,
+  F9: 120,
+  F10: 121,
+  F11: 122,
+  F12: 123,
   ACCENT: 192,
 };
 
+const KEYBOARD_LAYOUT = [
+  '1234567890',
+  'qwertyuiop',
+  'asdfghjkl<',
+  '^zxcvbnm_>',
+];
+
 const KEY_NAME = {};
 for (const keyName in KEY_CODE) KEY_NAME[KEY_CODE[keyName]] = keyName;
-
-let controlKeyboard, panelScroll;
-let controlInput, controlBrowse, controlScroll;
 
 const pad = (padChar, length) => new Array(length + 1).join(padChar);
 
 const { userAgent } = navigator;
 
-const isMobile = () => (
+const isMobile = () =>
   userAgent.match(/Android/i) ||
   userAgent.match(/webOS/i) ||
   userAgent.match(/iPhone/i) ||
   userAgent.match(/iPad/i) ||
   userAgent.match(/iPod/i) ||
   userAgent.match(/BlackBerry/i) ||
-  userAgent.match(/Windows Phone/i)
-);
+  userAgent.match(/Windows Phone/i);
 
-let viewportHeight, viewableRatio;
-let contentHeight, scrollHeight;
-let thumbHeight, thumbPosition;
-
-const refreshScroll = () => {
-  viewportHeight = controlBrowse.offsetHeight;
-  contentHeight = controlBrowse.scrollHeight;
-  viewableRatio = viewportHeight / contentHeight;
-  scrollHeight = panelScroll.offsetHeight;
-  thumbHeight = scrollHeight * viewableRatio;
-  thumbPosition = controlBrowse.scrollTop * thumbHeight / viewportHeight;
-  controlScroll.style.top = thumbPosition + 'px';
-  controlScroll.style.height = thumbHeight + 'px';
-};
-
-const scrollBottom = () => {
-  refreshScroll();
-  controlBrowse.scrollTop = controlBrowse.scrollHeight;
-};
-
-const initScroll = () => {
-  controlBrowse.scrollTop = controlBrowse.scrollHeight;
-  controlBrowse.addEventListener('scroll', refreshScroll);
-  window.addEventListener('orientationchange', () => {
-    setTimeout(scrollBottom, 0);
+const sleep = (msec) =>
+  new Promise((resolve) => {
+    setTimeout(() => {
+      resolve();
+    }, msec);
   });
+
+const urlKind = (url) => {
+  if (url.startsWith('mailto:')) return 'mail';
+  if (url.startsWith('http:')) return 'web';
+  if (url.startsWith('https:')) return 'web';
+  const k = url.indexOf('/');
+  if (k === -1) return 'base';
+  return url.substring(0, k);
 };
 
-const showKeyboard = () => {
-  if (!isMobile()) return;
-  controlKeyboard.style.display = 'block';
-  controlBrowse.style.bottom = controlKeyboard.offsetHeight + 'px';
-};
-
-const inputSetValue = value => {
-  controlInput.inputValue = value;
-  if (controlInput.inputType === 'masked') {
-    value = pad('*', value.length);
+const followLink = async (event) => {
+  const url = event.target.getAttribute('data-link');
+  const kind = urlKind(url);
+  if (kind === 'mail' || kind === 'web') {
+    window.open(url, '_blank');
+    return;
   }
-  value = value.replace(/ /g, '&nbsp;');
-  controlInput.innerHTML = (
-    controlInput.inputPrompt + value + '<span>&block;</span>'
-  );
+  const name = url.substring(0, url.length - '.md'.length);
+  const { text } = await api.console.content({ name });
+  application.print(text);
 };
 
-const input = (type, prompt, callback) => {
-  showKeyboard();
-  controlInput.style.display = 'none';
-  controlBrowse.removeChild(controlInput);
-  controlInput.inputActive = true;
-  controlInput.inputPrompt = prompt;
-  inputSetValue('');
-  controlInput.inputType = type;
-  controlInput.inputCallback = callback;
-  controlBrowse.appendChild(controlInput);
-  controlInput.style.display = 'block';
-  setTimeout(scrollBottom, 0);
+const followLastMore = () => {
+  const mores = document.querySelectorAll('#panelConsole a.more');
+  if (mores.length === 0) return;
+  const text = mores[mores.length - 1].getAttribute('data-text');
+  for (const more of mores) more.parentElement.remove();
+  application.print(text);
 };
 
-const clear = () => {
-  const elements = controlBrowse.children;
-  for (let i = elements.length - 2; i > 1; i--) {
-    const element = elements[i];
-    controlBrowse.removeChild(element);
-  }
+const removeMores = () => {
+  const mores = document.querySelectorAll('#panelConsole a.more');
+  for (const more of mores) more.parentElement.remove();
 };
 
-const print = s => {
-  const list = Array.isArray(s);
-  let line = list ? s.shift() : s;
-  if (!line) line = '';
-  const element = document.createElement('div');
-  if (!line) line = '\xa0';
-  if (line.charAt(0) === '<') {
-    element.innerHTML += line;
-  } else {
-    const timer = setInterval(() => {
-      const char = line.charAt(0);
-      element.innerHTML += char;
-      line = line.substr(1);
-      if (!line) clearInterval(timer);
-      controlBrowse.scrollTop = controlBrowse.scrollHeight;
-      scrollBottom();
-    }, TIME_CHAR);
-  }
-  if (list && s.length) setTimeout(print, TIME_LINE, s);
-  controlBrowse.insertBefore(element, controlInput);
-  controlBrowse.scrollTop = controlBrowse.scrollHeight;
-  scrollBottom();
+const moreLink = (event) => {
+  const text = event.target.getAttribute('data-text');
+  event.target.parentElement.remove();
+  application.print(text);
+};
+
+const blobToBase64 = (blob) => {
+  const reader = new FileReader();
+  reader.readAsDataURL(blob);
+  return new Promise((resolve) => {
+    reader.onloadend = () => {
+      resolve(reader.result);
+    };
+  });
 };
 
 const inputKeyboardEvents = {
   ESC() {
-    clear();
-    inputSetValue('');
+    application.clear();
+    application.inputSetValue('');
+  },
+  SPACE() {
+    followLastMore();
   },
   BACKSPACE() {
-    inputSetValue(controlInput.inputValue.slice(0, -1));
+    application.inputSetValue(application.controlInput.inputValue.slice(0, -1));
   },
   ENTER() {
-    let value = controlInput.inputValue;
-    if (controlInput.inputType === 'masked') {
+    let value = application.controlInput.inputValue;
+    if (application.controlInput.inputType === 'masked') {
       value = pad('*', value.length);
     }
-    print(controlInput.inputPrompt + value);
-    controlInput.style.display = 'none';
-    controlInput.inputActive = false;
-    controlInput.inputCallback(null, value);
+    application.print(application.controlInput.inputPrompt + value);
+    application.controlInput.style.display = 'none';
+    application.controlInput.inputActive = false;
+    application.controlInput.inputCallback(null, value);
   },
   CAPS() {
-    if (controlKeyboard.className === 'caps') {
-      controlKeyboard.className = '';
+    if (application.keyboard.controlKeyboard.className === 'caps') {
+      application.keyboard.controlKeyboard.className = '';
     } else {
-      controlKeyboard.className = 'caps';
+      application.keyboard.controlKeyboard.className = 'caps';
     }
   },
-  KEY(char) { // Alpha or Digit
-    if (controlKeyboard.className === 'caps') {
+  KEY(char) {
+    // Alpha or Digit
+    if (application.keyboard.controlKeyboard.className === 'caps') {
       char = char.toUpperCase();
     }
-    inputSetValue(controlInput.inputValue + char);
+    application.inputSetValue(application.controlInput.inputValue + char);
+  },
+};
+
+document.onkeydown = (event) => {
+  if (application.controlInput.inputActive) {
+    const keyName = KEY_NAME[event.keyCode];
+    const fn = inputKeyboardEvents[keyName];
+    if (fn) {
+      fn();
+      return false;
+    }
   }
 };
 
-const keyboardClick = e => {
+document.onkeypress = (event) => {
+  if (application.controlInput.inputActive) {
+    const fn = inputKeyboardEvents['KEY'];
+    const char = String.fromCharCode(event.keyCode);
+    if (CHARS.includes(char) && fn) {
+      fn(char);
+      return false;
+    }
+  }
+};
+
+const keyboardClick = (e) => {
   let char = e.target.inputChar;
   if (char === '_') char = ' ';
   let keyName = 'KEY';
@@ -180,72 +191,22 @@ const keyboardClick = e => {
   return false;
 };
 
-const initKeyboard = () => {
-  if (!isMobile()) return;
-  controlKeyboard.style.display = 'block';
-  const KEYBOARD_LAYOUT = [
-    '1234567890',
-    'qwertyuiop',
-    'asdfghjkl<',
-    '^zxcvbnm_>'
-  ];
-  for (let i = 0; i < KEYBOARD_LAYOUT.length; i++) {
-    const keyboardLine = KEYBOARD_LAYOUT[i];
-    const elementLine = document.createElement('div');
-    controlKeyboard.appendChild(elementLine);
-    for (let j = 0; j < keyboardLine.length; j++) {
-      let char = keyboardLine[j];
-      if (char === ' ') char = '&nbsp;';
-      const elementKey = document.createElement('div');
-      elementKey.innerHTML = char;
-      elementKey.inputChar = char;
-      elementKey.className = 'key';
-      elementKey.style.opacity = ((i + j) % 2) ? 0.8 : 1;
-      elementKey.addEventListener('click', keyboardClick);
-      elementLine.appendChild(elementKey);
-    }
-  }
-  controlBrowse.style.bottom = controlKeyboard.offsetHeight + 'px';
-};
-
-document.onkeydown = event => {
-  if (controlInput.inputActive) {
-    const keyName = KEY_NAME[event.keyCode];
-    const fn = inputKeyboardEvents[keyName];
-    if (fn) {
-      fn();
-      return false;
-    }
-  }
-};
-
-document.onkeypress = event => {
-  if (controlInput.inputActive) {
-    const fn = inputKeyboardEvents['KEY'];
-    const char = String.fromCharCode(event.keyCode);
-    if (CHARS.includes(char) && fn) {
-      fn(char);
-      return false;
-    }
-  }
-};
-
-const blobToBase64 = blob => {
-  const reader = new FileReader();
-  reader.readAsDataURL(blob);
-  return new Promise(resolve => {
-    reader.onloadend = () => {
-      resolve(reader.result);
-    };
+const uploadFile = (file, done) => {
+  blobToBase64(file).then((url) => {
+    const data = url.substring(url.indexOf(',') + 1);
+    api.example.uploadFile({ name: file.name, data }).then(done);
   });
 };
 
-const uploadFile = (file, done) => {
-  blobToBase64(file)
-    .then(url => {
-      const data = url.substring(url.indexOf(',') + 1);
-      api.example.uploadFile({ name: file.name, data }).then(done);
-    });
+const saveFile = (fileName, blob) => {
+  const a = document.createElement('a');
+  a.style.display = 'none';
+  document.body.appendChild(a);
+  const url = window.URL.createObjectURL(blob);
+  a.href = url;
+  a.download = fileName;
+  a.click();
+  URL.revokeObjectURL(url);
 };
 
 const upload = () => {
@@ -257,13 +218,13 @@ const upload = () => {
   fileSelect.click();
   fileSelect.onchange = () => {
     const files = Array.from(fileSelect.files);
-    print('Uploading ' + files.length + ' file(s)');
+    application.print('Uploading ' + files.length + ' file(s)');
     files.sort((a, b) => a.size - b.size);
     let i = 0;
     const uploadNext = () => {
       const file = files[i];
       uploadFile(file, () => {
-        print(`name: ${file.name}, size: ${file.size} done`);
+        application.print(`name: ${file.name}, size: ${file.size} done`);
         i++;
         if (i < files.length) {
           return uploadNext();
@@ -276,57 +237,232 @@ const upload = () => {
   };
 };
 
-const exec = async line => {
-  const args = line.split(' ');
-  if (args[0] === 'upload') {
-    upload();
-  } else {
-    const data = await api.cms.content(args);
-    print(data);
+class Keyboard {
+  constructor(application) {
+    this.controlKeyboard = document.getElementById('controlKeyboard');
+    if (!isMobile()) return;
+    for (let i = 0; i < KEYBOARD_LAYOUT.length; i++) {
+      const keyboardLine = KEYBOARD_LAYOUT[i];
+      const elementLine = document.createElement('div');
+      this.controlKeyboard.appendChild(elementLine);
+      for (let j = 0; j < keyboardLine.length; j++) {
+        let char = keyboardLine[j];
+        if (char === ' ') char = '&nbsp;';
+        const elementKey = document.createElement('div');
+        elementKey.innerHTML = char;
+        elementKey.inputChar = char;
+        elementKey.className = 'key';
+        elementKey.style.opacity = (i + j) % 2 ? 0.8 : 1;
+        elementKey.addEventListener('click', keyboardClick);
+        elementLine.appendChild(elementKey);
+      }
+    }
+    this.controlKeyboard.style.display = 'none';
   }
-  commandLoop();
-};
+
+  show() {
+    this.controlKeyboard.style.display = 'block';
+    const down = this.controlKeyboard.offsetHeight + 'px';
+    application.controlBrowse.style.bottom = down;
+  }
+
+  hide() {
+    this.controlKeyboard.style.display = 'none';
+    application.controlBrowse.style.bottom = '0';
+  }
+}
+
+class Scroller {
+  constructor(application) {
+    this.viewportHeight = 0;
+    this.viewableRatio = 0;
+    this.contentHeight = 0;
+    this.scrollHeight = 0;
+    this.thumbHeight = 0;
+    this.thumbPosition = 0;
+    this.panelScroll = document.getElementById('panelScroll');
+    this.controlScroll = document.getElementById('controlScroll');
+    const height = application.controlBrowse.scrollHeight;
+    application.controlBrowse.scrollTop = height;
+    application.controlBrowse.addEventListener('scroll', () => {
+      this.refreshScroll();
+    });
+    window.addEventListener('orientationchange', () => {
+      setTimeout(() => {
+        this.scrollBottom();
+      }, 0);
+    });
+  }
+
+  refreshScroll() {
+    this.viewportHeight = application.controlBrowse.offsetHeight;
+    this.contentHeight = application.controlBrowse.scrollHeight;
+    this.viewableRatio = this.viewportHeight / this.contentHeight;
+    this.scrollHeight = this.panelScroll.offsetHeight;
+    this.thumbHeight = this.scrollHeight * this.viewableRatio;
+    const top = application.controlBrowse.scrollTop;
+    this.thumbPosition = (top * this.thumbHeight) / this.viewportHeight;
+    this.controlScroll.style.top = this.thumbPosition + 'px';
+    this.controlScroll.style.height = this.thumbHeight + 'px';
+  }
+
+  scrollBottom() {
+    this.refreshScroll();
+    const top = application.controlBrowse.scrollHeight;
+    application.controlBrowse.scrollTop = top;
+  }
+}
 
 function commandLoop() {
-  input('command', '.', (err, line) => {
-    exec(line);
+  application.input('command', '.', (err, line) => {
+    application.exec(line);
     commandLoop();
   });
 }
 
-const signIn = async () => {
-  try {
-    await metacom.load('auth');
-    await api.auth.status();
-  } catch (err) {
-    await api.auth.signIn({ login: 'marcus', password: 'marcus' });
+class Application {
+  constructor() {
+    this.controlInput = document.getElementById('controlInput');
+    this.controlBrowse = document.getElementById('controlBrowse');
+    this.keyboard = new Keyboard(this);
+    this.scroller = new Scroller(this);
+    const protocol = location.protocol === 'http:' ? 'ws' : 'wss';
+    this.metacom = Metacom.create(`${protocol}://${location.host}/api`);
   }
-  await metacom.load('example');
-  api.example.on('resmon', data => print(JSON.stringify(data)));
-  api.example.subscribe();
-};
 
-window.addEventListener('load', () => {
-  panelScroll = document.getElementById('panelScroll');
-  controlInput = document.getElementById('controlInput');
-  controlKeyboard = document.getElementById('controlKeyboard');
-  controlBrowse = document.getElementById('controlBrowse');
-  controlScroll = document.getElementById('controlScroll');
-  initKeyboard();
-  initScroll();
-  const path = window.location.pathname.substring(1);
-  print([
-    'Metarhia is a Community, Technology Stack and R&D Center',
-    'for Cloud Computing and Distributed Database Systems',
-    '',
-    'Commands: about, fields, team, links, stack, contacts',
-  ]);
-  if (path) {
-    setTimeout(() => {
-      exec('contacts ' + path);
-      window.history.replaceState(null, '', '/');
-    }, TIME_LINE * 3);
+  clear() {
+    const elements = this.controlBrowse.children;
+    for (let i = elements.length - 2; i > 1; i--) {
+      const element = elements[i];
+      this.controlBrowse.removeChild(element);
+    }
   }
-  signIn();
+
+  inputSetValue(value) {
+    this.controlInput.inputValue = value;
+    if (this.controlInput.inputType === 'masked') {
+      value = pad('*', value.length);
+    }
+    value = value.replace(/ /g, '&nbsp;');
+    const html = this.controlInput.inputPrompt + value + '<span>&block;</span>';
+    this.controlInput.innerHTML = html;
+  }
+
+  input(type, prompt, callback) {
+    this.controlInput.style.display = 'none';
+    this.controlBrowse.removeChild(this.controlInput);
+    this.controlInput.inputActive = true;
+    this.controlInput.inputPrompt = prompt;
+    this.inputSetValue('');
+    this.controlInput.inputType = type;
+    this.controlInput.inputCallback = callback;
+    this.controlBrowse.appendChild(this.controlInput);
+    this.controlInput.style.display = 'block';
+    setTimeout(() => {
+      this.scroller.scrollBottom();
+    }, 0);
+  }
+
+  more(text = '') {
+    const element = document.createElement('div');
+    this.controlBrowse.insertBefore(element, this.controlInput);
+    const label = '--More--';
+    element.innerHTML = `<a data-text="${text}" class="more">${label}</a>`;
+    const [link] = element.querySelectorAll('a');
+    link.onclick = moreLink;
+    const top = this.controlBrowse.scrollHeight;
+    this.controlBrowse.scrollTop = top;
+    this.scroller.scrollBottom();
+  }
+
+  async print(text = '') {
+    removeMores();
+    const element = document.createElement('div');
+    this.controlBrowse.insertBefore(element, this.controlInput);
+    let i = 0;
+    let word = '';
+    const output = async () => {
+      if (word === '') return;
+      element.innerHTML += word;
+      word = '';
+      await sleep(TIME_CHAR);
+    };
+    while (i < text.length) {
+      const char = text.charAt(i);
+      i++;
+      if (char === '\n') {
+        await output();
+        const next = text.charAt(i);
+        const prev = text.charAt(i - 2);
+        word = ' ';
+        if (next === '\n' || prev === '\n') word = '<br/>';
+        if (next === '-' || (next >= 0 && next <= 9)) word = '<br/>';
+        await output();
+      } else if (char === '#') {
+        await output();
+        if (i > 1) {
+          this.more(text.substring(i));
+          break;
+        }
+        const headerStart = text.indexOf(' ', i) + 1;
+        const headerEnd = text.indexOf('\n', i);
+        const header = text.substring(headerStart, headerEnd);
+        word = `<span class="header">${header}</span>`;
+        i = headerEnd;
+        await output();
+      } else if (char === '[') {
+        await output();
+        const labelEnd = text.indexOf(']', i);
+        const linkEnd = text.indexOf(')', i);
+        const label = text.substring(i, labelEnd);
+        const url = text.substring(labelEnd + 2, linkEnd);
+        const kind = urlKind(url);
+        word = `<a data-link="${url}" class="${kind}">${label}</a>`;
+        i = linkEnd + 1;
+        await output();
+      } else {
+        word += char;
+      }
+      const top = this.controlBrowse.scrollHeight;
+      this.controlBrowse.scrollTop = top;
+      this.scroller.scrollBottom();
+    }
+    if (i >= text.length) {
+      element.innerHTML += '<br/>';
+      const top = this.controlBrowse.scrollHeight;
+      this.controlBrowse.scrollTop = top;
+      this.scroller.scrollBottom();
+    }
+    const links = element.querySelectorAll('a');
+    for (const link of links) {
+      link.onclick = followLink;
+    }
+  }
+
+  async exec(line) {
+    const args = line.split(' ');
+    if (args[0] === 'upload') {
+      upload();
+    } else if (args[0] === 'download') {
+      const packet = await api.example.downloadFile();
+      console.log({ packet });
+    } else if (args[0] === 'counter') {
+      const packet = await api.example.counter();
+      application.print(`counter: ${packet.result}`);
+    }
+    commandLoop();
+  }
+}
+
+window.addEventListener('load', async () => {
+  window.application = new Application();
+  window.api = window.application.metacom.api;
+  await application.metacom.load('console');
+  const { text } = await api.console.content({ name: 'home' });
+  application.print(text);
   commandLoop();
 });
+
+if (navigator.serviceWorker) {
+  navigator.serviceWorker.register('/worker.js');
+}

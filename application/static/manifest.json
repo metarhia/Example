@@ -1,21 +1,23 @@
 {
+  "name": "Metarhia",
   "short_name": "Metarhia",
-  "name": "Metarhia console",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "theme_color": "#009933",
+  "background_color": "#552277",
+  "description": "Metarhia community and technology stack",
+  "categories": ["node.js", "javascript", "technology stack", "community"],
   "icons": [
     {
-      "src": "/favicon.png",
+      "src": "favicon.png",
       "type": "image/png",
       "sizes": "128x128"
     },
     {
-      "src": "/metarhia.png",
+      "src": "metarhia.png",
       "type": "image/png",
       "sizes": "256x256"
     }
-  ],
-  "start_url": "/",
-  "background_color": "#552277",
-  "display": "standalone",
-  "scope": "/",
-  "theme_color": "#009933"
+  ]
 }

@@ -1,5 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="900" height="256">
-<circle fill="#ffffff" r="110" cy="128" cx="128"/>
-<text xml:space="preserve" font-family="Arial" font-size="120" y="130" x="274" fill="#ddd" font-weight="bold">Metarhia</text>
-<text xml:space="preserve" font-family="Arial" font-size="43" y="200" x="274" fill="#eee" font-weight="bold">tech stack &amp; community</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="2200" height="720">
+<path fill="#7db500" d="M 100,188 L 367,18 L 167,244 Z" fill-rule="evenodd"/>
+<path fill="#8ecc00" d="M 167,244 L 527,243 L 367,18 Z" fill-rule="evenodd"/>
+<path fill="#7db500" d="M 367,18 L 527,243 L 664,186 Z" fill-rule="evenodd"/>
+<path fill="#699900" d="M 100,188 L 167,244 L 85,514 Z" fill-rule="evenodd"/>
+<path fill="#5d8500" d="M 167,244 L 350,544 L 85,514 Z" fill-rule="evenodd"/>
+<path fill="#699900" d="M 664,186 L 527,243 L 650,511 Z" fill-rule="evenodd"/>
+<path fill="#5d8500" d="M 527,243 L 650,511 L 350,544 Z" fill-rule="evenodd"/>
+<path fill="#699900" d="M 167,244 L 527,243 L 350,544 Z" fill-rule="evenodd"/>
+<path fill="#507300" d="M 85,514 L 350,544 L 381,694 Z" fill-rule="evenodd"/>
+<path fill="#425e00" d="M 350,544 L 381,694 L 650,511 Z" fill-rule="evenodd"/>
+<text xml:space="preserve" font-family="Arial" font-size="330" y="360" x="750" fill="#ddd" font-weight="bold">Metarhia</text>
+<text xml:space="preserve" font-family="Arial" font-size="118" y="520" x="760" fill="#eee" font-weight="bold">tech stack &amp; community</text>
 </svg>
