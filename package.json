@@ -54,7 +54,7 @@
     "metatests": "^0.7.2"
   },
   "dependencies": {
-    "impress": "^2.0.2",
+    "impress": "^2.0.3",
     "metasql": "^0.3.0-alpha.0",
     "redis": "^3.0.2"
   }
