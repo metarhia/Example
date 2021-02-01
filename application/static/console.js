@@ -457,7 +457,11 @@ class Application {
 window.addEventListener('load', async () => {
   window.application = new Application();
   window.api = window.application.metacom.api;
-  await application.metacom.load('console');
+  await application.metacom.load('auth', 'console', 'example');
+  const result = await api.auth.status();
+  if (result.status !== 'logged') {
+    await api.auth.signIn({ login: 'marcus', password: 'marcus' });
+  }
   const { text } = await api.console.content({ name: 'home' });
   application.print(text);
   commandLoop();
