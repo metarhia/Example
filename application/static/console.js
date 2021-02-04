@@ -238,7 +238,7 @@ const upload = () => {
 };
 
 class Keyboard {
-  constructor(application) {
+  constructor() {
     this.controlKeyboard = document.getElementById('controlKeyboard');
     if (!isMobile()) return;
     for (let i = 0; i < KEYBOARD_LAYOUT.length; i++) {
@@ -446,6 +446,7 @@ class Application {
     } else if (args[0] === 'download') {
       const packet = await api.example.downloadFile();
       console.log({ packet });
+      saveFile('fileName', packet);
     } else if (args[0] === 'counter') {
       const packet = await api.example.counter();
       application.print(`counter: ${packet.result}`);
@@ -458,9 +459,14 @@ window.addEventListener('load', async () => {
   window.application = new Application();
   window.api = window.application.metacom.api;
   await application.metacom.load('auth', 'console', 'example');
-  const result = await api.auth.status();
-  if (result.status !== 'logged') {
-    await api.auth.signIn({ login: 'marcus', password: 'marcus' });
+  const token = localStorage.getItem('metarhia.session.token');
+  if (token) {
+    await api.auth.restore({ token });
+  } else {
+    const res = await api.auth.signin({ login: 'marcus', password: 'marcus' });
+    if (res.token) {
+      localStorage.setItem('metarhia.session.token', res.token);
+    }
   }
   const { text } = await api.console.content({ name: 'home' });
   application.print(text);

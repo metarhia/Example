@@ -1,6 +1,6 @@
 ({
   access: 'public',
-  async method({ login, password, fullName }) => {
+  method: async ({ login, password, fullName }) => {
     const hash = await metarhia.metautil.hashPassword(password);
     await application.auth.registerUser(login, hash, fullName);
     const token = await context.client.startSession();

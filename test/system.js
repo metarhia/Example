@@ -29,7 +29,7 @@ const tasks = [
   }
 ];
 
-const getRequest = task => {
+const getRequest = (task) => {
   const request = {
     host: HOST,
     port: PORT,
@@ -54,18 +54,18 @@ const getRequest = task => {
 };
 
 setTimeout(() => {
-  tasks.forEach(task => {
+  tasks.forEach((task) => {
     const name = task.get || task.post;
     console.log('HTTP request ' + name);
     const request = getRequest(task);
     const req = http.request(request);
-    req.on('response', res => {
+    req.on('response', (res) => {
       const expectedStatus = task.status || 200;
       setTimeout(() => {
         assert.equal(res.statusCode, expectedStatus);
       }, TEST_TIMEOUT);
     });
-    req.on('error', err => {
+    req.on('error', (err) => {
       console.log(err.stack);
     });
     if (task.data) req.write(task.data);
