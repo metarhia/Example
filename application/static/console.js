@@ -460,9 +460,12 @@ window.addEventListener('load', async () => {
   window.api = window.application.metacom.api;
   await application.metacom.load('auth', 'console', 'example');
   const token = localStorage.getItem('metarhia.session.token');
+  let logged = false;
   if (token) {
-    await api.auth.restore({ token });
-  } else {
+    const res = await api.auth.restore({ token });
+    logged = res.status === 'logged';
+  }
+  if (!logged) {
     const res = await api.auth.signin({ login: 'marcus', password: 'marcus' });
     if (res.token) {
       localStorage.setItem('metarhia.session.token', res.token);
