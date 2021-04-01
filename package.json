@@ -49,13 +49,13 @@
     "node": "^12.9 || 14 || 15"
   },
   "devDependencies": {
-    "@types/node": "^14.14.35",
-    "eslint": "^7.22.0",
+    "@types/node": "^14.14.37",
+    "eslint": "^7.23.0",
     "metatests": "^0.7.2"
   },
   "dependencies": {
-    "impress": "^2.1.0",
+    "impress": "^2.1.1",
     "metasql": "^1.0.0",
-    "redis": "^3.0.2"
+    "redis": "^3.1.0"
   }
 }
