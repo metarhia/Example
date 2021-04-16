@@ -25,15 +25,15 @@ const tasks = [
   {
     post: '/api',
     method: 'signIn',
-    args: { login: 'marcus', password: 'marcus' }
-  }
+    args: { login: 'marcus', password: 'marcus' },
+  },
 ];
 
 const getRequest = (task) => {
   const request = {
     host: HOST,
     port: PORT,
-    agent: false
+    agent: false,
   };
   if (task.get) {
     request.method = 'GET';
@@ -47,7 +47,7 @@ const getRequest = (task) => {
     task.data = JSON.stringify(packet);
     request.headers = {
       'Content-Type': 'application/json',
-      'Content-Length': task.data.length
+      'Content-Length': task.data.length,
     };
   }
   return request;

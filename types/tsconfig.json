@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "moduleResolution": "node",
+    "strict": true,
+    "baseUrl": ".",
+    "preserveWatchOutput": true,
+    "allowJs": true
+  },
+  "include": ["*.d.ts", "*.ts"]
+}

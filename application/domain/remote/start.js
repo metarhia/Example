@@ -1,4 +1,4 @@
-(async () => {
+async () => {
   // Wait for server start
   await new Promise((resolve) => setTimeout(resolve, 100));
   if (application.worker.id === 'W1') {
@@ -19,4 +19,4 @@
       console.warn('Can not load metacom interface: "example"');
     }
   }
-});
+};

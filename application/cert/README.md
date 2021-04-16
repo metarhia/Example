@@ -4,7 +4,7 @@
 
 - Let's Encrypt is a free certificate authority: https://letsencrypt.org/
 - Use Certbot (free tool for automatically using Let’s Encrypt certificates on
-manually-administrated websites to enable HTTPS): https://certbot.eff.org/
+  manually-administrated websites to enable HTTPS): https://certbot.eff.org/
 
 ```
 curl -O https://dl.eff.org/certbot-auto

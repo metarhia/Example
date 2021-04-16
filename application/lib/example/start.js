@@ -8,5 +8,5 @@
       const res = lib.example.cache.get({ key: 'keyName' });
       console.debug({ res, cache: this.parent.cache.values });
     }
-  }
+  },
 });
