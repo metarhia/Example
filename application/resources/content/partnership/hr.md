@@ -8,6 +8,7 @@ GRASP, SOLID and GoF, DDD, IoC, DI, TDD, rule of three, Law of Demeter,
 Fail-fast, DRY, KISS, YAGNI, Secure by design, Agile, SSOT, etc.
 
 Create/improve a team proposition for partners:
+
 - Find right experts and developers
 - Hiring, interviewing, onboarding and reformatting
 - Knowledge transfer

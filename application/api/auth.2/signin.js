@@ -8,5 +8,5 @@
     console.log(`Logged user: ${login}`);
     const token = await context.client.startSession(user.systemUserId);
     return { status: 'logged', token };
-  }
+  },
 });

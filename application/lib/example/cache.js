@@ -10,5 +10,5 @@
     const res = this.values.get(key);
     console.debug({ get: key, return: res });
     return res;
-  }
+  },
 });
