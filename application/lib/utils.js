@@ -5,7 +5,7 @@
     if (bytes === 0) return '0';
     const exp = Math.floor(Math.log(bytes) / Math.log(1000));
     const size = bytes / 1000 ** exp;
-    const short = Math.round(size, 2);
+    const short = size.toFixed(2);
     const unit = this.UNITS[exp];
     return short + unit;
   },
