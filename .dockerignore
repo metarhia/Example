@@ -4,7 +4,6 @@
 .npmignore
 .eslintignore
 .editorconfig
-.travis.yml
 test
 node_modules
 LICENSE
