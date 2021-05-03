@@ -1,6 +1,6 @@
 # Metarhia Example Server for Node.js
 
-[![travis](https://travis-ci.org/metarhia/impress.svg?branch=master)](https://travis-ci.org/metarhia/Example)
+[![CI Status](https://github.com/metarhia/Example/workflows/Testing%20CI/badge.svg)](https://github.com/metarhia/Example/actions?query=workflow%3A"Testing+CI"+branch%3Amaster)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/metarhia/Example/blob/master/LICENSE)
 
 ## Concept
