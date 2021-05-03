@@ -44,7 +44,7 @@
   "types": "types/global.d.ts",
   "scripts": {
     "test": "npm run lint && npm run types && node test/system.js",
-    "types": "tsc -p types/tsconfig.json",
+    "types": "tsc",
     "lint": "eslint . && prettier -c \"**/*.js\" \"**/*.json\" \"**/*.md\" \"**/*.yml\" \"**/*.ts\"",
     "fmt": "prettier --write \"**/*.js\" \"**/*.json\" \"**/*.md\" \"**/*.yml\" \"**/*.ts\""
   },
