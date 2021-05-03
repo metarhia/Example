@@ -8,5 +8,5 @@
     "allowJs": true,
     "noEmit": true
   },
-  "include": ["*.d.ts", "*.ts", "../application/**/*"]
+  "include": ["types/**/*.ts", "application/**/*"]
 }
