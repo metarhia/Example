@@ -46,7 +46,8 @@
     "test": "npm run lint && npm run types && node test/system.js",
     "types": "tsc",
     "lint": "eslint . && prettier -c \"**/*.js\" \"**/*.json\" \"**/*.md\" \"**/*.yml\" \"**/*.ts\"",
-    "fmt": "prettier --write \"**/*.js\" \"**/*.json\" \"**/*.md\" \"**/*.yml\" \"**/*.ts\""
+    "fmt": "prettier --write \"**/*.js\" \"**/*.json\" \"**/*.md\" \"**/*.yml\" \"**/*.ts\"",
+    "db": "metasql c"
   },
   "engines": {
     "node": "^12.9 || 14 || 15"
@@ -60,7 +61,7 @@
   },
   "dependencies": {
     "impress": "^2.2.0",
-    "metasql": "^1.0.1",
+    "metasql": "^1.1.1",
     "redis": "^3.1.1"
   }
 }
