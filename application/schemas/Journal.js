@@ -1,11 +1,11 @@
 ({
-  //Details: {},
+  Journal: { scope: 'local', allow: 'append' },
 
   identifier: 'Identifier',
   account: 'Account',
   server: 'Server',
   action: 'string',
-  dateTime: 'DateTime',
+  dateTime: 'datetime',
   ip: 'ip',
   details: 'json',
 });

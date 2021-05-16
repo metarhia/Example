@@ -1,5 +1,5 @@
 ({
-  //Relation: {},
+  Relation: {},
 
   role: 'Role',
   identifier: 'Identifier',

@@ -1,5 +1,5 @@
 ({
-  //Details: {},
+  Details: {},
 
   account: 'Account',
   token: { type: 'string', unique: true },

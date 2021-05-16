@@ -1,7 +1,7 @@
 ({
   name: 'example',
   description: 'Example database schema',
-  version: 2,
+  version: 4,
   driver: 'pg',
 
   authors: [
