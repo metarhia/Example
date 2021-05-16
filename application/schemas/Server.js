@@ -1,5 +1,5 @@
 ({
-  //Registry: {},
+  Registry: { scope: 'global' },
 
   name: { type: 'string', unique: true },
   suffix: { type: 'string', unique: true },
