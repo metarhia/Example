@@ -474,6 +474,9 @@ window.addEventListener('load', async () => {
   const { text } = await api.console.content({ name: 'home' });
   application.print(text);
   commandLoop();
+
+  api.example.on('resmon', resmonData => console.log(resmonData));
+  
 });
 
 if (navigator.serviceWorker) {

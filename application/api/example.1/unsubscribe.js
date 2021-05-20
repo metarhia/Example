@@ -1,6 +1,8 @@
 async () => {
-    const isTimerExists = lib.example.storage.set({ key: 'subscribeTimer' });
+    const isTimerExists = lib.example.timersStore({ key: 'subscribeTimer' });
     if (isTimerExists) { clearInterval(isTimerExists); }
-    lib.example.storage.set({ del: 'subscribeTimer' });
+
+    lib.example.timersStore({ del: 'subscribeTimer' });
+    
     return { unsubscribed: 'resmon' };
 };

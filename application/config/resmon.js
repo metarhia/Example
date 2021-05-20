@@ -1,4 +1,4 @@
 ({
-  interval: 30000,
+  interval: 10000,
   active: false,
 });
