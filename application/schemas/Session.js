@@ -1,5 +1,5 @@
 ({
-  Details: {},
+  Entity: {},
 
   account: 'Account',
   token: { type: 'string', unique: true },
