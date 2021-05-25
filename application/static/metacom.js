@@ -130,23 +130,24 @@ export class Metacom extends EventEmitter {
   }
 
   scaffold(iname, ver) {
-    return (methodName) => async (args = {}) => {
-      const callId = ++this.callId;
-      const interfaceName = ver ? `${iname}.${ver}` : iname;
-      const target = interfaceName + '/' + methodName;
-      if (!this.connected) await this.open();
-      return new Promise((resolve, reject) => {
-        setTimeout(() => {
-          if (this.calls.has(callId)) {
-            this.calls.delete(callId);
-            reject(new Error('Request timeout'));
-          }
-        }, this.callTimeout);
-        this.calls.set(callId, [resolve, reject]);
-        const packet = { call: callId, [target]: args };
-        this.send(JSON.stringify(packet));
-      });
-    };
+    return (methodName) =>
+      async (args = {}) => {
+        const callId = ++this.callId;
+        const interfaceName = ver ? `${iname}.${ver}` : iname;
+        const target = interfaceName + '/' + methodName;
+        if (!this.connected) await this.open();
+        return new Promise((resolve, reject) => {
+          setTimeout(() => {
+            if (this.calls.has(callId)) {
+              this.calls.delete(callId);
+              reject(new Error('Request timeout'));
+            }
+          }, this.callTimeout);
+          this.calls.set(callId, [resolve, reject]);
+          const packet = { call: callId, [target]: args };
+          this.send(JSON.stringify(packet));
+        });
+      };
   }
 }
 
