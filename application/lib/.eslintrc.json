@@ -3,6 +3,7 @@
     "strict": ["error", "never"]
   },
   "globals": {
+    "api": "readonly",
     "application": "readonly",
     "config": "readonly",
     "node": "readonly",
