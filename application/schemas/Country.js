@@ -1,5 +1,5 @@
 ({
-  Registry: { scope: 'global', allow: 'append' },
+  Entity: {},
 
   name: { type: 'string', unique: true },
 });
