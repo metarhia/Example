@@ -1,5 +1,6 @@
 {
   "globals": {
+    "api": "readonly",
     "application": "readonly",
     "config": "readonly",
     "context": "readonly",
