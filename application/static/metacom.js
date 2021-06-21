@@ -46,7 +46,6 @@ export class Metacom extends EventEmitter {
     this.callId = 0;
     this.calls = new Map();
     this.streams = new Map();
-    this.currentStream = null;
     this.active = false;
     this.connected = false;
     this.lastActivity = new Date().getTime();
@@ -107,7 +106,6 @@ export class Metacom extends EventEmitter {
           });
           return;
         }
-        this.currentStream = stream;
       }
     }
   }
@@ -164,9 +162,6 @@ class WebsocketTransport extends Metacom {
         this.message(data);
         return;
       }
-      if (!this.currentStream) return;
-      this.currentStream.chunks.push(data);
-      this.currentStream = null;
     });
 
     socket.addEventListener('close', () => {
@@ -176,7 +171,8 @@ class WebsocketTransport extends Metacom {
       }, this.reconnectTimeout);
     });
 
-    socket.addEventListener('error', () => {
+    socket.addEventListener('error', (err) => {
+      this.emit('error', err);
       socket.close();
     });
 
