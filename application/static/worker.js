@@ -12,12 +12,12 @@ const CACHE_FILES = [
   '/metarhia.svg',
 ];
 
-async function registerContent() {
+const registerContent = async () => {
   const cache = await caches.open(CACHE_NAME);
   return cache.addAll(CACHE_FILES);
-}
+};
 
-async function checkVersionUpdates() {
+const checkVersionUpdates = async () => {
   const cacheWhitelist = [CACHE_NAME];
   const cacheNames = await caches.keys();
   return Promise.all(
@@ -25,9 +25,9 @@ async function checkVersionUpdates() {
       if (!cacheWhitelist.includes(name)) return caches.delete(name);
     })
   );
-}
+};
 
-async function getContent(request) {
+const getContent = async (request) => {
   const cached = await caches.match(request);
   if (cached) return cached;
   const response = await fetch(request);
@@ -36,7 +36,7 @@ async function getContent(request) {
     cache.put(request, response.clone());
   }
   return response;
-}
+};
 
 self.addEventListener('install', (event) => {
   const contentRegistration = registerContent();
