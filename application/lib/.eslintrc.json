@@ -9,6 +9,7 @@
     "node": "readonly",
     "npm": "readonly",
     "lib": "readonly",
+    "db": "readonly",
     "domain": "readonly",
     "metarhia": "readonly"
   }

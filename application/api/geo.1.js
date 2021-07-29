@@ -1,6 +1,6 @@
 ({
   plugin: 'metasql/crud',
-  database: domain.db,
+  database: db.pg,
   entities: {
     City: ['create', 'get', 'select', 'update', 'delete'],
     Country: ['get'],
