@@ -10,6 +10,7 @@
       "npm",
       "api",
       "lib",
+      "db",
       "domain",
       "config",
       "metarhia"
