@@ -54,6 +54,7 @@
   },
   "devDependencies": {
     "@types/node": "^16.3.3",
+    "@types/pg": "^8.6.0",
     "@types/ws": "^7.4.6",
     "eslint": "^7.31.0",
     "metatests": "^0.7.2",
