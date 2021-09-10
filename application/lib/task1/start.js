@@ -1,13 +1,13 @@
 async () => {
   if (application.worker.id === 'W1') {
-    setTimeout(() => {
-      console.debug('Add task');
-      application.scheduler.add({
+    setTimeout(async () => {
+      const res = await application.scheduler.add({
         name: 'name',
-        every: 'Jul 28th 10s',
+        every: 'Sep 10th 10s',
         args: { i: 2 },
         run: 'lib.task1.f1',
       });
-    }, 2000);
+      console.log('Add task', res);
+    }, 1000);
   }
 };
