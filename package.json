@@ -53,16 +53,16 @@
     "node": "^12.9 || 14 || 16"
   },
   "devDependencies": {
-    "@types/node": "^16.9.1",
+    "@types/node": "^16.10.3",
     "@types/pg": "^8.6.0",
-    "@types/ws": "^7.4.6",
+    "@types/ws": "^8.2.0",
     "eslint": "^7.31.0",
     "metatests": "^0.7.2",
     "prettier": "^2.4.0",
     "typescript": "^4.4.3"
   },
   "dependencies": {
-    "impress": "^2.6.4",
+    "impress": "^2.6.5",
     "metasql": "^2.0.1",
     "pg": "^8.7.1",
     "redis": "^3.1.2"
