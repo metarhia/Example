@@ -1,0 +1,64 @@
+name: Testing CI
+
+on: [pull_request]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_PASSWORD: marcus
+          POSTGRES_USER: marcus
+          POSTGRES_DB: application
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    strategy:
+      matrix:
+        node:
+          - 12
+          - 14
+          - 16
+        os:
+          - ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node }}
+      - uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get install --yes postgresql-client
+      - name: Seed database
+        run: |
+          psql -h localhost -d application -f ./db/structure.sql -U marcus
+          psql -h localhost -d application -f ./db/data.sql -U marcus
+        env:
+          PGPASSWORD: marcus
+      - run: npm ci
+      - run: npm test
