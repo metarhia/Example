@@ -65,5 +65,5 @@ let's start with
 
 ## License
 
-Copyright (c) 2020-2021 Metarhia contributors.
+Copyright (c) 2020-2022 Metarhia contributors.
 This starter kit is [MIT licensed](./LICENSE).
