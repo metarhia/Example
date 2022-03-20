@@ -1,3 +1,3 @@
 async () => {
-  throw new Error('Hello', 12345);
+  throw new Error('Example exception');
 };

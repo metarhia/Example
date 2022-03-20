@@ -1,1 +1,1 @@
-async () => new Error('Hello!', 54321);
+async () => new Error('Return error');
