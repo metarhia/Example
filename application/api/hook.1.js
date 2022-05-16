@@ -1,10 +1,7 @@
 ({
-  router({ method, args }) {
-    console.log({ method, args });
-    if (method === 'favicon') {
-      context.client.redirect('http://127.0.0.1/favicon.png');
-    }
-    const result = {};
-    return result;
+  router({ method, args, verb, headers }) {
+    const ip = context.client.ip;
+    console.log({ method, args, ip, verb, headers });
+    return {};
   },
 });
