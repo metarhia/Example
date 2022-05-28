@@ -10,6 +10,7 @@
     "npm": "readonly",
     "lib": "readonly",
     "db": "readonly",
+    "bus": "readonly",
     "domain": "readonly",
     "metarhia": "readonly"
   }
