@@ -19,7 +19,7 @@
     "semi": ["error", "always"],
     "no-loop-func": ["error"],
     "block-spacing": ["error", "always"],
-    "camelcase": ["error"],
+    "camelcase": ["error", { "properties": "never" }],
     "eqeqeq": ["error", "always"],
     "strict": ["error", "global"],
     "brace-style": [
