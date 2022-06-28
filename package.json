@@ -62,8 +62,8 @@
     "typescript": "^4.6.4"
   },
   "dependencies": {
-    "impress": "^2.6.10",
-    "metasql": "^2.0.3",
+    "impress": "^3.0.0-alpha.1",
+    "metasql": "^2.0.4",
     "pg": "^8.7.3",
     "redis": "^4.1.0"
   }

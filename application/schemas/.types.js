@@ -1,5 +1,4 @@
 ({
-  datetime: 'timestamp with time zone',
-  json: 'jsonb',
-  ip: 'inet',
+  json: { metadata: { pg: 'jsonb' } },
+  ip: { js: 'string', metadata: { pg: 'inet' } },
 });
