@@ -19,21 +19,9 @@ class MetacomError extends Error {
   }
 }
 
-class MetacomInterface {
+class MetacomInterface extends EventEmitter {
   constructor() {
-    this._events = new Map();
-  }
-
-  on(name, fn) {
-    const event = this._events.get(name);
-    if (event) event.add(fn);
-    else this._events.set(name, new Set([fn]));
-  }
-
-  emit(name, ...args) {
-    const event = this._events.get(name);
-    if (!event) return;
-    for (const fn of event.values()) fn(...args);
+    super();
   }
 }
 
@@ -155,7 +143,7 @@ export class Metacom extends EventEmitter {
 class WebsocketTransport extends Metacom {
   async open() {
     if (this.opening) return this.opening;
-    if (this.connected) return;
+    if (this.connected) return Promise.reslve();
     const socket = new WebSocket(this.url);
     this.active = true;
     this.socket = socket;
@@ -233,16 +221,11 @@ class HttpTransport extends Metacom {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: data,
-    }).then((res) => {
-      const { status } = res;
-      if (status === 200) {
-        return res.text().then((packet) => {
-          if (packet.error) throw new MetacomError(packet.error);
-          this.message(packet);
-        });
-      }
-      throw new Error(`Status Code: ${status}`);
-    });
+    }).then((res) =>
+      res.text().then((packet) => {
+        this.message(packet);
+      }),
+    );
   }
 }
 
