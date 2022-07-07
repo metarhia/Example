@@ -165,6 +165,7 @@ document.onkeydown = (event) => {
       return false;
     }
   }
+  return true;
 };
 
 document.onkeypress = (event) => {
@@ -176,6 +177,7 @@ document.onkeypress = (event) => {
       return false;
     }
   }
+  return true;
 };
 
 const keyboardClick = (e) => {
@@ -226,11 +228,10 @@ const upload = () => {
       uploadFile(file, () => {
         application.print(`name: ${file.name}, size: ${file.size} done`);
         i++;
-        if (i < files.length) {
-          return uploadNext();
-        }
+        if (i < files.length) return uploadNext();
         document.body.removeChild(element);
         commandLoop();
+        return null;
       });
     };
     uploadNext();
@@ -315,6 +316,7 @@ class Scroller {
 
 function commandLoop() {
   application.input('command', '.', (err, line) => {
+    if (err) console.error(err);
     application.exec(line);
     commandLoop();
   });
