@@ -10,7 +10,9 @@
 dnf -y install certbot
 sudo certbot certonly --standalone
 ```
+
 or
+
 ```
 curl -O https://dl.eff.org/certbot-auto
 chmod a+x certbot-auto
