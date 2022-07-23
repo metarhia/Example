@@ -109,16 +109,6 @@ const moreLink = (event) => {
   application.print(text);
 };
 
-const blobToBase64 = (blob) => {
-  const reader = new FileReader();
-  reader.readAsDataURL(blob);
-  return new Promise((resolve) => {
-    reader.onloadend = () => {
-      resolve(reader.result);
-    };
-  });
-};
-
 const inputKeyboardEvents = {
   ESC() {
     application.clear();
@@ -193,11 +183,27 @@ const keyboardClick = (e) => {
   return false;
 };
 
-const uploadFile = (file, done) => {
-  blobToBase64(file).then((url) => {
-    const data = url.substring(url.indexOf(',') + 1);
-    api.example.uploadFile({ name: file.name, data }).then(done);
+const uploadFile = async (file) => {
+  // createBlobUploader creates streamId and inits file reader for convenience
+  const uploader = application.metacom.createBlobUploader(file);
+  // Prepare backend file consumer
+  await api.files.upload({
+    streamId: uploader.streamId,
+    name: file.name,
   });
+  // Start uploading stream and wait for its end
+  await uploader.upload();
+  return { uploadedFile: file };
+};
+
+const downloadFile = async (name, type) => {
+  // Init backend file producer to get streamId
+  const { streamId } = await api.files.download({ name });
+  // Get metacom readable stream
+  const readable = await application.metacom.getStream(streamId);
+  // Convert stream to blob to make a file on the client
+  const blob = await readable.toBlob(type);
+  return new File([blob], name);
 };
 
 const saveFile = (fileName, blob) => {
@@ -223,16 +229,15 @@ const upload = () => {
     application.print('Uploading ' + files.length + ' file(s)');
     files.sort((a, b) => a.size - b.size);
     let i = 0;
-    const uploadNext = () => {
+    const uploadNext = async () => {
       const file = files[i];
-      uploadFile(file, () => {
-        application.print(`name: ${file.name}, size: ${file.size} done`);
-        i++;
-        if (i < files.length) return uploadNext();
-        document.body.removeChild(element);
-        commandLoop();
-        return null;
-      });
+      await uploadFile(file);
+      application.print(`name: ${file.name}, size: ${file.size} done`);
+      i++;
+      if (i < files.length) return uploadNext();
+      document.body.removeChild(element);
+      commandLoop();
+      return null;
     };
     uploadNext();
   };
@@ -446,9 +451,10 @@ class Application {
     if (args[0] === 'upload') {
       upload();
     } else if (args[0] === 'download') {
-      const packet = await api.example.downloadFile();
-      console.log({ packet });
-      saveFile('fileName', packet);
+      const fileName = 'content/home.md';
+      const file = await downloadFile(fileName, 'txt/plain');
+      console.log({ file });
+      saveFile('home.md', file);
     } else if (args[0] === 'counter') {
       const packet = await api.example.counter();
       application.print(`counter: ${packet.result}`);
@@ -460,7 +466,7 @@ class Application {
 window.addEventListener('load', async () => {
   window.application = new Application();
   window.api = window.application.metacom.api;
-  await application.metacom.load('auth', 'console', 'example');
+  await application.metacom.load('auth', 'console', 'example', 'files');
   const token = localStorage.getItem('metarhia.session.token');
   let logged = false;
   if (token) {
