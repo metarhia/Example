@@ -206,6 +206,43 @@ const downloadFile = async (name, type) => {
   return new File([blob], name);
 };
 
+const saveFile = (fileName, blob) => {
+  const a = document.createElement('a');
+  a.style.display = 'none';
+  document.body.appendChild(a);
+  const url = window.URL.createObjectURL(blob);
+  a.href = url;
+  a.download = fileName;
+  a.click();
+  URL.revokeObjectURL(url);
+};
+
+const upload = () => {
+  const element = document.createElement('form');
+  element.style.visibility = 'hidden';
+  element.innerHTML = '<input id="fileSelect" type="file" multiple />';
+  document.body.appendChild(element);
+  const fileSelect = document.getElementById('fileSelect');
+  fileSelect.click();
+  fileSelect.onchange = () => {
+    const files = Array.from(fileSelect.files);
+    application.print('Uploading ' + files.length + ' file(s)');
+    files.sort((a, b) => a.size - b.size);
+    let i = 0;
+    const uploadNext = async () => {
+      const file = files[i];
+      await uploadFile(file);
+      application.print(`name: ${file.name}, size: ${file.size} done`);
+      i++;
+      if (i < files.length) return uploadNext();
+      document.body.removeChild(element);
+      commandLoop();
+      return null;
+    };
+    uploadNext();
+  };
+};
+
 class Keyboard {
   constructor() {
     this.controlKeyboard = document.getElementById('controlKeyboard');
@@ -412,9 +449,12 @@ class Application {
   async exec(line) {
     const args = line.split(' ');
     if (args[0] === 'upload') {
-      // TODO: add uploadFile usage example
+      upload();
     } else if (args[0] === 'download') {
-      // TODO: add downloadFile usage example
+      const fileName = 'content/home.md';
+      const file = await downloadFile(fileName, 'txt/plain');
+      console.log({ file });
+      saveFile('home.md', file);
     } else if (args[0] === 'counter') {
       const packet = await api.example.counter();
       application.print(`counter: ${packet.result}`);
