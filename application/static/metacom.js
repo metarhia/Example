@@ -1,4 +1,5 @@
-import { EventEmitter } from './events.js';
+import EventEmitter from './events.js';
+import { MetacomChunk, MetacomReadable, MetacomWritable } from './streams.js';
 
 const CALL_TIMEOUT = 7 * 1000;
 const PING_INTERVAL = 60 * 1000;
@@ -34,6 +35,7 @@ export class Metacom extends EventEmitter {
     this.callId = 0;
     this.calls = new Map();
     this.streams = new Map();
+    this.streamId = 0;
     this.active = false;
     this.connected = false;
     this.opening = null;
@@ -50,7 +52,37 @@ export class Metacom extends EventEmitter {
     return new Transport(url, options);
   }
 
-  message(data) {
+  getStream(streamId) {
+    const stream = this.streams.get(streamId);
+    if (stream) return stream;
+    throw new Error(`Stream ${streamId} is not initialized`);
+  }
+
+  createStream(name, size) {
+    const streamId = ++this.streamId;
+    const initData = { streamId, name, size };
+    const transport = this;
+    return new MetacomWritable(transport, initData);
+  }
+
+  createBlobUploader(blob) {
+    const name = blob.name || 'blob';
+    const size = blob.size;
+    const consumer = this.createStream(name, size);
+    return {
+      streamId: consumer.streamId,
+      upload: async () => {
+        const reader = blob.stream().getReader();
+        let chunk;
+        while (!(chunk = await reader.read()).done) {
+          consumer.write(chunk.value);
+        }
+        consumer.end();
+      },
+    };
+  }
+
+  async message(data) {
     if (data === '{}') return;
     this.lastActivity = new Date().getTime();
     let packet;
@@ -73,31 +105,43 @@ export class Metacom extends EventEmitter {
           return;
         }
         resolve(args);
-        return;
-      }
-      if (callType === 'event') {
+      } else if (callType === 'event') {
         const [interfaceName, eventName] = target.split('/');
         const metacomInterface = this.api[interfaceName];
         metacomInterface.emit(eventName, args);
-      }
-      if (callType === 'stream') {
-        const { name, size, status } = packet;
-        if (name) {
-          const stream = { name, size, chunks: [], received: 0 };
-          this.streams.set(callId, stream);
-          return;
-        }
-        const stream = this.streams.get(callId);
-        if (status) {
-          this.streams.delete(callId);
-          const blob = new Blob(stream.chunks);
-          blob.text().then((text) => {
-            console.log({ text });
-          });
-          return;
+      } else if (callType === 'stream') {
+        const { stream: streamId, name, size, status } = packet;
+        const stream = this.streams.get(streamId);
+        if (name && typeof name === 'string' && Number.isSafeInteger(size)) {
+          if (stream) {
+            console.error(new Error(`Stream ${name} is already initialized`));
+          } else {
+            const streamData = { streamId, name, size };
+            const stream = new MetacomReadable(streamData);
+            this.streams.set(streamId, stream);
+          }
+        } else if (!stream) {
+          console.error(new Error(`Stream ${streamId} is not initialized`));
+        } else if (status === 'end') {
+          await stream.close();
+          this.streams.delete(streamId);
+        } else if (status === 'terminate') {
+          await stream.terminate();
+          this.streams.delete(streamId);
+        } else {
+          console.error(new Error('Stream packet structure error'));
         }
       }
     }
+  }
+
+  async binary(blob) {
+    const buffer = await blob.arrayBuffer();
+    const byteView = new Uint8Array(buffer);
+    const { streamId, payload } = MetacomChunk.decode(byteView);
+    const stream = this.streams.get(streamId);
+    if (stream) await stream.push(payload);
+    else console.warn(`Stream ${streamId} is not initialized`);
   }
 
   async load(...interfaces) {
@@ -143,17 +187,15 @@ export class Metacom extends EventEmitter {
 class WebsocketTransport extends Metacom {
   async open() {
     if (this.opening) return this.opening;
-    if (this.connected) return Promise.reslve();
+    if (this.connected) return Promise.resolve();
     const socket = new WebSocket(this.url);
     this.active = true;
     this.socket = socket;
     connections.add(this);
 
     socket.addEventListener('message', ({ data }) => {
-      if (typeof data === 'string') {
-        this.message(data);
-        return;
-      }
+      if (typeof data === 'string') this.message(data);
+      else this.binary(data);
     });
 
     socket.addEventListener('close', () => {
