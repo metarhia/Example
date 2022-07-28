@@ -466,7 +466,7 @@ class Application {
 window.addEventListener('load', async () => {
   window.application = new Application();
   window.api = window.application.metacom.api;
-  await application.metacom.load('auth', 'console', 'example');
+  await application.metacom.load('auth', 'console', 'example', 'files');
   const token = localStorage.getItem('metarhia.session.token');
   let logged = false;
   if (token) {
