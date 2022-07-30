@@ -5,7 +5,7 @@ async () => {
         area: 'Europe',
         location: 'Kiev',
       });
-      console.log(time);
+      console.log(`${time.timezone} - ${time.datetime}`);
     }, 1000);
   }
 };
