@@ -26,7 +26,7 @@ services:
       - POSTGRES_PASSWORD=marcus
       - POSTGRES_DB=application
     volumes:
-      - ./data/postgres/:/var/lib/postgresql/data
+      - /var/lib/postgresql/data
       - ./db/structure.sql:/docker-entrypoint-initdb.d/1.sql
       - ./db/data.sql:/docker-entrypoint-initdb.d/2.sql
     ports:
