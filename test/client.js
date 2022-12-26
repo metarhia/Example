@@ -1,6 +1,7 @@
 'use strict';
 const metatests = require('metatests');
 const { Metacom } = require('metacom/lib/client');
+let token = '';
 
 const connect = async () => {
   const url = 'ws://127.0.0.1:8000/api';
@@ -17,8 +18,10 @@ const connect = async () => {
     login: 'marcus',
     password: 'marcus',
   });
-  if (typeof signin !== 'object' || signin.status !== 'logged')
+  if (typeof signin !== 'object' || signin?.status !== 'logged')
     return console.log('Not logged');
+  token = signin?.token;
+  // console.log(signin);
   runTests(client);
 };
 
@@ -40,6 +43,98 @@ const runTests = (client) => {
     const add = await client.socketCall('example')('add')({ a: 1, b: 2 });
     test.strictSame(add, 3);
     test.end();
+  });
+
+  metatests.testAsync('example/citiesByCountry', async (test) => {
+    const cities = await client.socketCall('example')('citiesByCountry')({
+      countryId: 1,
+    });
+    // console.log(cities);
+    test.strictEqual(cities?.result, 'success');
+    test.strictEqual(Array.isArray(cities?.data), true);
+    test.end();
+  });
+
+  metatests.testAsync('example/customError', async (test) => {
+    try {
+      await client.socketCall('example')('customError')();
+
+    } catch (customError) {
+      test.errorCompare(customError, new Error('Return custom error', 12345));
+      test.strictEqual(customError?.code, 12345);
+    } finally {
+      test.end();
+    }
+  });
+
+  metatests.testAsync('example/customException', async (test) => {
+    try {
+      await client.socketCall('example')('customException')();
+    } catch (customError) {
+      test.errorCompare(customError, new Error('Custom ecxeption', 12345));
+      test.strictEqual(customError?.code, 12345);
+    } finally {
+      test.end();
+    }
+  });
+
+  metatests.testAsync('example/error', async (test) => {
+    try {
+      await client.socketCall('example')('error')();
+    } catch (Error) {
+      test.errorCompare(Error, new Error('Return error'));
+    } finally {
+      test.end();
+    }
+  });
+
+  metatests.testAsync('example/exception', async (test) => {
+    try {
+      await client.socketCall('example')('exception')();
+    } catch (Error) {
+      test.errorCompare(Error, new Error('Example exception'));
+    } finally {
+      test.end();
+    }
+  });
+
+  metatests.testAsync('example/getClientInfo', async (test) => {
+    try {
+      const info = await client.socketCall('example')('getClientInfo')();
+      // console.log(info);
+      test.strictEqual(info?.result?.ip, '127.0.0.1');
+      test.strictEqual(info?.result?.token, token);
+      test.strictEqual(info?.result?.accountId, '2');
+
+    } catch (Error) {
+     console.log(Error);
+    } finally {
+      test.end();
+    }
+  });
+
+  // metatests.testAsync('example/resources', async (test) => {
+  //   try {
+  //     const resources = await client.socketCall('example')('resources')();
+  //     console.log(resources);
+  //   } catch (Error) {
+  //    console.log(Error);
+  //   } finally {
+  //     test.end();
+  //   }
+  // });
+
+  metatests.testAsync('example/wait', async (test) => {
+    try {
+      const wait = await client.socketCall('example')('wait')({'delay': 1000});
+      console.log(wait);
+      test.strictEqual(wait, 'done');
+
+    } catch (Error) {
+     console.log(Error);
+    } finally {
+      test.end();
+    }
   });
 
   // process.exit();
