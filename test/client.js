@@ -1,6 +1,8 @@
 'use strict';
+
 const metatests = require('metatests');
 const { Metacom } = require('metacom/lib/client');
+
 let token = '';
 
 const connect = async () => {
@@ -21,7 +23,6 @@ const connect = async () => {
   if (typeof signin !== 'object' || signin?.status !== 'logged')
     return console.log('Not logged');
   token = signin?.token;
-  // console.log(signin);
   runTests(client);
 };
 
@@ -34,7 +35,6 @@ const runTests = (client) => {
       'files',
       'test',
     ]);
-    // console.log(introspect);
     test.strictSame(introspect?.auth?.restore?.[0], 'token');
     test.end();
   });
@@ -49,7 +49,6 @@ const runTests = (client) => {
     const cities = await client.socketCall('example')('citiesByCountry')({
       countryId: 1,
     });
-    // console.log(cities);
     test.strictEqual(cities?.result, 'success');
     test.strictEqual(Array.isArray(cities?.data), true);
     test.end();
@@ -58,7 +57,6 @@ const runTests = (client) => {
   metatests.testAsync('example/customError', async (test) => {
     try {
       await client.socketCall('example')('customError')();
-
     } catch (customError) {
       test.errorCompare(customError, new Error('Return custom error', 12345));
       test.strictEqual(customError?.code, 12345);
@@ -101,11 +99,9 @@ const runTests = (client) => {
   metatests.testAsync('example/getClientInfo', async (test) => {
     try {
       const info = await client.socketCall('example')('getClientInfo')();
-      // console.log(info);
       test.strictEqual(info?.result?.ip, '127.0.0.1');
       test.strictEqual(info?.result?.token, token);
       test.strictEqual(info?.result?.accountId, '2');
-
     } catch (Error) {
      console.log(Error);
     } finally {
@@ -150,8 +146,6 @@ const runTests = (client) => {
       test.end();
     }
   });
-
-  // process.exit();
 };
 
 connect();
