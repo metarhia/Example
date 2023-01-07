@@ -109,31 +109,34 @@ const runTests = (client) => {
     }
   });
 
-  // metatests.testAsync('example/redisSet + redisGet', async (test) => {
-  //   try {
-  //     const setting = await client.socketCall('example')('redisSet')({ 'key':'MetarhiaExampleTest', 'value':1 });
-  //     const getting = await client.socketCall('example')('redisGet')({ 'key':'MetarhiaExampleTest' });
+  metatests.testAsync('example/redisSet + redisGet', async (test) => {
+    try {
+      const setting = await client.socketCall('example')('redisSet')({
+        key: 'MetarhiaExampleTest',
+        value: 1,
+      });
+      const getting = await client.socketCall('example')('redisGet')({
+        key: 'MetarhiaExampleTest',
+      });
+      console.log('setting', setting);
+      console.log('getting', getting);
+    } catch (Error) {
+      test.errorCompare(Error, new Error('Example exception'));
+    } finally {
+      test.end();
+    }
+  });
 
-  //     console.log('setting', setting);
-  //     console.log('getting', getting);
-
-  //   } catch (Error) {
-  //     test.errorCompare(Error, new Error('Example exception'));
-  //   } finally {
-  //     test.end();
-  //   }
-  // });
-
-  // metatests.testAsync('example/resources', async (test) => {
-  //   try {
-  //     const resources = await client.socketCall('example')('resources')();
-  //     console.log(resources);
-  //   } catch (Error) {
-  //    console.log(Error);
-  //   } finally {
-  //     test.end();
-  //   }
-  // });
+  metatests.testAsync('example/resources', async (test) => {
+    try {
+      const resources = await client.socketCall('example')('resources')();
+      console.log(resources);
+    } catch (Error) {
+     console.log(Error);
+    } finally {
+      test.end();
+    }
+  });
 
   metatests.testAsync('example/wait', async (test) => {
     try {
