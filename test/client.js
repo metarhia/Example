@@ -5,27 +5,6 @@ const { Metacom } = require('metacom/lib/client');
 
 let token = '';
 
-const connect = async () => {
-  const url = 'ws://127.0.0.1:8000/api';
-  let client;
-  try {
-    client = Metacom.create(url);
-  } catch (e) {
-    console.log(e);
-  }
-
-  if (!client) return console.log('No client');
-  await client.ready();
-  const signin = await client.socketCall('auth')('signin')({
-    login: 'marcus',
-    password: 'marcus',
-  });
-  if (typeof signin !== 'object' || signin?.status !== 'logged')
-    return console.log('Not logged');
-  token = signin?.token;
-  runTests(client);
-};
-
 const runTests = (client) => {
   metatests.testAsync('system/introspect', async (test) => {
     const introspect = await client.socketCall('system')('introspect')([
@@ -148,6 +127,32 @@ const runTests = (client) => {
       test.end();
     }
   });
+};
+
+const connect = async () => {
+  const url = 'ws://127.0.0.1:8000/api';
+  let client;
+  try {
+    client = Metacom.create(url);
+  } catch (e) {
+    console.log(e);
+  }
+
+  if (!client) {
+    console.log('No client');
+    return;
+  }
+  await client.ready();
+  const signin = await client.socketCall('auth')('signin')({
+    login: 'marcus',
+    password: 'marcus',
+  });
+  if (typeof signin !== 'object' || signin?.status !== 'logged') {
+    console.log('Not logged');
+    return;
+  }
+  token = signin?.token;
+  runTests(client);
 };
 
 connect();
