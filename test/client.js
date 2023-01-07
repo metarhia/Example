@@ -103,7 +103,7 @@ const runTests = (client) => {
       test.strictEqual(info?.result?.token, token);
       test.strictEqual(info?.result?.accountId, '2');
     } catch (Error) {
-     console.log(Error);
+      console.log(Error);
     } finally {
       test.end();
     }
@@ -132,7 +132,7 @@ const runTests = (client) => {
       const resources = await client.socketCall('example')('resources')();
       console.log(resources);
     } catch (Error) {
-     console.log(Error);
+      console.log(Error);
     } finally {
       test.end();
     }
@@ -140,11 +140,10 @@ const runTests = (client) => {
 
   metatests.testAsync('example/wait', async (test) => {
     try {
-      const wait = await client.socketCall('example')('wait')({'delay': 1000});
+      const wait = await client.socketCall('example')('wait')({ delay: 1000 });
       test.strictEqual(wait, 'done');
-
     } catch (Error) {
-     console.log(Error);
+      console.log(Error);
     } finally {
       test.end();
     }
