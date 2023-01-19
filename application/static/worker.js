@@ -1,4 +1,6 @@
-const files = [
+// Change version here in case of static content updates
+const CACHE_NAME = 'metarhia-static-v1';
+const CACHE_FILES = [
   '/',
   '/console.css',
   '/events.js',
@@ -10,16 +12,46 @@ const files = [
   '/metarhia.svg',
 ];
 
-self.addEventListener('install', async (event) => {
-  const cache = await caches.open('metarhia');
-  event.waitUntil(cache.addAll(files));
-});
+const registerContent = async () => {
+  const cache = await caches.open(CACHE_NAME);
+  return cache.addAll(CACHE_FILES);
+};
 
-self.addEventListener('fetch', async ({ request }) => {
-  const cache = await caches.open('metarhia');
-  const cached = await cache.match(request);
+const checkVersionUpdates = async () => {
+  const cacheWhitelist = [CACHE_NAME];
+  const cacheNames = await caches.keys();
+  return Promise.all(
+    cacheNames.map((name) => {
+      if (!cacheWhitelist.includes(name)) return caches.delete(name);
+    })
+  );
+};
+
+const getContent = async (request) => {
+  const cached = await caches.match(request);
   if (cached) return cached;
   const response = await fetch(request);
-  if (response.status < 400) cache.put(request, response.clone());
+  if (response && response.status === 200 && response.type === 'basic') {
+    const cache = await caches.open(CACHE_NAME);
+    cache.put(request, response.clone());
+  }
   return response;
+};
+
+self.addEventListener('install', (event) => {
+  const contentRegistration = registerContent();
+  event.waitUntil(contentRegistration);
+});
+
+self.addEventListener('activate', (event) => {
+  const versionChecking = checkVersionUpdates();
+  event.waitUntil(versionChecking);
+});
+
+self.addEventListener('fetch', (event) => {
+  const request = event.request;
+  if (request.url.startsWith('http')) {
+    const contentRetrieving = getContent(request);
+    event.respondWith(contentRetrieving);
+  }
 });
