@@ -49,7 +49,7 @@ let's start with
 
 ## Usage
 
-- You need node.js v12.5.0 or later (v14 prefered)
+- You need node.js v14 or later
 - Fork and clone this repository (optionally subscribe to repo changes)
 - Run `npm i` to install dependencies and generate RSA certificate
 - Remove unneeded dependencies if your project doesn't require them
@@ -64,5 +64,5 @@ let's start with
 
 ## License
 
-Copyright (c) 2020-2022 Metarhia contributors.
+Copyright (c) 2020-2023 Metarhia contributors.
 This starter kit is [MIT licensed](./LICENSE).
