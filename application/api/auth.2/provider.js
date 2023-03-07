@@ -4,23 +4,30 @@
     return metarhia.metautil.generateToken(secret, characters, length);
   },
 
-  saveSession(token, data) {
-    db.pg.update('Session', { data: JSON.stringify(data) }, { token });
+  async saveSession(token, data) {
+    console.log({ saveSession: { token, data } });
+    try {
+      await db.pg.update('Session', { data: JSON.stringify(data) }, { token });
+    } catch (error) {
+      console.error(error);
+    }
   },
 
-  startSession(token, data, fields = {}) {
+  async createSession(token, data, fields = {}) {
     const record = { token, data: JSON.stringify(data), ...fields };
-    db.pg.insert('Session', record);
+    console.log({ createSession: record });
+    return db.pg.insert('Session', record);
   },
 
-  async restoreSession(token) {
+  async readSession(token) {
     const record = await db.pg.row('Session', ['data'], { token });
+    console.log({ readSession: { token, record } });
     if (record && record.data) return record.data;
     return null;
   },
 
-  deleteSession(token) {
-    db.pg.delete('Session', { token });
+  async deleteSession(token) {
+    return db.pg.delete('Session', { token });
   },
 
   async registerUser(login, password) {
