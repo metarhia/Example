@@ -20,11 +20,7 @@ class MetacomError extends Error {
   }
 }
 
-class MetacomInterface extends EventEmitter {
-  constructor() {
-    super();
-  }
-}
+class MetacomInterface extends EventEmitter {}
 
 export class Metacom extends EventEmitter {
   constructor(url, options = {}) {
