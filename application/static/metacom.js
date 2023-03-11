@@ -1,5 +1,5 @@
 import EventEmitter from './events.js';
-import { MetacomChunk, MetacomReadable, MetacomWritable } from './streams.js';
+import { Chunk, MetaReadable, MetaWritable } from './streams.js';
 
 const CALL_TIMEOUT = 7 * 1000;
 const PING_INTERVAL = 60 * 1000;
@@ -20,11 +20,7 @@ class MetacomError extends Error {
   }
 }
 
-class MetacomInterface extends EventEmitter {
-  constructor() {
-    super();
-  }
-}
+class MetacomInterface extends EventEmitter {}
 
 export class Metacom extends EventEmitter {
   constructor(url, options = {}) {
@@ -36,6 +32,7 @@ export class Metacom extends EventEmitter {
     this.calls = new Map();
     this.streams = new Map();
     this.streamId = 0;
+    this.eventId = 0;
     this.active = false;
     this.connected = false;
     this.opening = null;
@@ -62,7 +59,7 @@ export class Metacom extends EventEmitter {
     const streamId = ++this.streamId;
     const initData = { streamId, name, size };
     const transport = this;
-    return new MetacomWritable(transport, initData);
+    return new MetaWritable(transport, initData);
   }
 
   createBlobUploader(blob) {
@@ -117,7 +114,7 @@ export class Metacom extends EventEmitter {
             console.error(new Error(`Stream ${name} is already initialized`));
           } else {
             const streamData = { streamId, name, size };
-            const stream = new MetacomReadable(streamData);
+            const stream = new MetaReadable(streamData);
             this.streams.set(streamId, stream);
           }
         } else if (!stream) {
@@ -138,7 +135,7 @@ export class Metacom extends EventEmitter {
   async binary(blob) {
     const buffer = await blob.arrayBuffer();
     const byteView = new Uint8Array(buffer);
-    const { streamId, payload } = MetacomChunk.decode(byteView);
+    const { streamId, payload } = Chunk.decode(byteView);
     const stream = this.streams.get(streamId);
     if (stream) await stream.push(payload);
     else console.warn(`Stream ${streamId} is not initialized`);
@@ -157,6 +154,11 @@ export class Metacom extends EventEmitter {
       for (const methodName of methodNames) {
         methods[methodName] = request(methodName);
       }
+      methods.on('*', (eventName, data) => {
+        const target = `${interfaceName}/${eventName}`;
+        const packet = { event: ++this.eventId, [target]: data };
+        this.send(JSON.stringify(packet));
+      });
       this.api[interfaceName] = methods;
     }
   }
