@@ -53,12 +53,12 @@
     "node": "^14.18 || 16 || 18 || 19"
   },
   "devDependencies": {
-    "@types/node": "^18.13.0",
+    "@types/node": "^18.15.2",
     "@types/pg": "^8.6.6",
     "@types/ws": "^8.5.4",
-    "eslint": "^8.34.0",
+    "eslint": "^8.36.0",
     "eslint-config-metarhia": "^8.1.0",
-    "eslint-config-prettier": "^8.6.0",
+    "eslint-config-prettier": "^8.7.0",
     "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-prettier": "^4.2.1",
     "metatests": "^0.8.2",
@@ -66,10 +66,9 @@
     "typescript": "^4.9.5"
   },
   "dependencies": {
-    "impress": "^3.0.0-alpha.10",
-    "metacom": "^3.0.0-alpha.7",
-    "metasql": "^2.1.2",
-    "pg": "^8.9.0",
-    "redis": "^4.6.4"
+    "impress": "^3.0.0-alpha.11",
+    "metasql": "^2.1.4",
+    "pg": "^8.10.0",
+    "redis": "^4.6.5"
   }
 }
