@@ -11,7 +11,7 @@
     const data = { accountId: user.accountId };
     context.client.startSession(token, data);
     const { ip } = context.client;
-    api.auth.provider.startSession(token, data, { ip, accountId });
+    await api.auth.provider.createSession(token, data, { ip, accountId });
     return { status: 'logged', token };
   },
 });

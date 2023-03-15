@@ -1,7 +1,7 @@
 'use strict';
 
-const http = require('http');
-const assert = require('assert').strict;
+const http = require('node:http');
+const assert = require('node:assert').strict;
 
 require('impress');
 

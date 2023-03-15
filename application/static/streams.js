@@ -14,7 +14,7 @@ const getStreamId = (buffer) => {
   return view.getInt32(0);
 };
 
-class MetacomChunk {
+class Chunk {
   static encode(streamId, payload) {
     const streamIdView = new Uint8Array(createStreamIdBuffer(streamId));
     const chunkView = new Uint8Array(STREAM_ID_LENGTH + payload.length);
@@ -35,7 +35,7 @@ const PULL_EVENT = Symbol();
 const DEFAULT_HIGH_WATER_MARK = 32;
 const MAX_HIGH_WATER_MARK = 1000;
 
-class MetacomReadable extends EventEmitter {
+class MetaReadable extends EventEmitter {
   constructor(initData, options = {}) {
     super();
     this.streamId = initData.streamId;
@@ -73,6 +73,7 @@ class MetacomReadable extends EventEmitter {
     await this.close();
   }
 
+  // implements nodejs readable pipe method
   pipe(writable) {
     void this.finalize(writable);
     return writable;
@@ -97,13 +98,11 @@ class MetacomReadable extends EventEmitter {
   }
 
   async stop() {
-    if (this.bytesRead === this.size) {
-      this.streaming = false;
-      this.emit(PUSH_EVENT, null);
-    } else {
+    while (this.bytesRead !== this.size) {
       await this.waitEvent(PULL_EVENT);
-      await this.stop();
     }
+    this.streaming = false;
+    this.emit(PUSH_EVENT, null);
   }
 
   async read() {
@@ -144,7 +143,7 @@ class MetacomReadable extends EventEmitter {
   }
 }
 
-class MetacomWritable extends EventEmitter {
+class MetaWritable extends EventEmitter {
   constructor(transport, initData) {
     super();
     this.transport = transport;
@@ -163,11 +162,14 @@ class MetacomWritable extends EventEmitter {
     this.transport.send(JSON.stringify(packet));
   }
 
+  // implements nodejs writable write method
   write(data) {
-    const chunk = MetacomChunk.encode(this.streamId, data);
+    const chunk = Chunk.encode(this.streamId, data);
     this.transport.send(chunk);
+    return true;
   }
 
+  // implements nodejs writable end method
   end() {
     const packet = { stream: this.streamId, status: 'end' };
     this.transport.send(JSON.stringify(packet));
@@ -179,4 +181,4 @@ class MetacomWritable extends EventEmitter {
   }
 }
 
-export { MetacomChunk, MetacomReadable, MetacomWritable };
+export { Chunk, MetaReadable, MetaWritable };

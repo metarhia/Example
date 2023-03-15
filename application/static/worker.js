@@ -10,9 +10,8 @@ const files = [
   '/metarhia.svg',
 ];
 
-self.addEventListener('install', async (event) => {
-  const cache = await caches.open('metarhia');
-  event.waitUntil(cache.addAll(files));
+self.addEventListener('install', (event) => {
+  event.waitUntil(caches.open('metarhia').then((cache) => cache.addAll(files)));
 });
 
 self.addEventListener('fetch', async ({ request }) => {

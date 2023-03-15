@@ -1,8 +1,9 @@
 ({
   access: 'public',
   method: async () => {
-    const ip = context.client.ip;
-    const { token, accountId } = context;
-    return { result: { ip, token, accountId } };
+    const { uuid, session, client } = context;
+    const { ip } = client;
+    const { token, accountId } = session;
+    return { result: { ip, token, accountId, uuid } };
   },
 });
