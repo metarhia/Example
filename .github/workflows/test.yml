@@ -9,10 +9,10 @@ jobs:
     strategy:
       matrix:
         node:
-          - 14
           - 16
           - 18
           - 19
+          - 20
         os:
           - ubuntu-latest
 

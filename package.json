@@ -50,7 +50,7 @@
     "db": "metasql c"
   },
   "engines": {
-    "node": "^14.18 || 16 || 18 || 19"
+    "node": "16 || 18 || 19 || 20"
   },
   "devDependencies": {
     "@types/node": "^18.15.13",
