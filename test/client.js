@@ -16,8 +16,8 @@ const runTests = async (
   wsToken,
   wsApi,
   httpClient,
-  httpToken,
-  httpApi,
+  // httpToken,
+  // httpApi,
 ) => {
   const tests = {
     'system/introspect': async (test) => {
@@ -111,8 +111,8 @@ const runTests = async (
         const getting = await wsApi.example.redisGet({
           key: 'MetarhiaExampleTest',
         });
-        // console.log({setting, getting});
-        test.strictEqual(getting, '1');
+        test.strictEqual(setting?.result, 'OK');
+        test.strictEqual(getting?.result, '1');
       } catch (err) {
         test.errorCompare(err, new Error('Example exception'));
       } finally {
@@ -206,6 +206,7 @@ const runTests = async (
   };
 
   const results = [];
+  console.log(`Run ${Object.entries(tests).length} tests`);
   for (const [caption, func] of Object.entries(tests)) {
     // console.log({ caption, func });
     results.push(metatests.testAsync(caption, func));
@@ -217,7 +218,7 @@ const runTests = async (
         if (!res.done) break;
       }
       clearInterval(timer);
-      resolve();
+      setTimeout(resolve, 2500);
     }, 1000);
   });
 };
@@ -232,7 +233,7 @@ function testHook({ url, path, argsString }) {
       // Any 2xx status code signals a successful response but
       // here we're only checking for 200.
       if (statusCode !== 200) {
-        error = new Error('Request Failed.\n' + `Status Code: ${statusCode}`);
+        error = new Error(`Request Failed.\n Status Code: ${statusCode}`);
       } else if (!/^application\/json/.test(contentType)) {
         error = new Error(
           'Invalid content-type.\n' +
