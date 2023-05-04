@@ -33,6 +33,12 @@ services:
       - 127.0.0.1:5432:5432
     restart: always
 
+  redis-example:
+    image: redis:alpine
+    container_name: redis-example
+    ports:
+      - 127.0.0.1:6379:6379
+    restart: always
 networks:
   default:
     name: api-example-network
