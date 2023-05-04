@@ -7,7 +7,7 @@ async ({ streamId, name }) => {
   } catch (err) {
     console.error(err);
   }
-  if (exist) return { result: `File with ${name} already exist on server` };
+  if (exist) return { result: `File ${name} already exist on server` };
   // Get incoming stream by streamId sent from client
   const readable = context.client.getStream(streamId);
   // Create nodejs stream to write file on server
