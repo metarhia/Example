@@ -10,5 +10,5 @@ async () => {
     }
     client.quit();
   });
-  //await client.connect();
+  await client.connect();
 };
