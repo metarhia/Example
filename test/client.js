@@ -1,10 +1,12 @@
 'use strict';
 
-const http = require('node:http');
+const { Metacom } = require('metacom/lib/client');
 const metatests = require('metatests');
+
+const http = require('node:http');
+const { Blob } = require('node:buffer');
 const fs = require('node:fs');
 const fsp = fs.promises;
-const { Blob } = require('node:buffer');
 
 const HOST = '127.0.0.1';
 const PORT = 8000;
@@ -119,7 +121,6 @@ const runTests = async (
       try {
         const resources = await wsApi.example.resources();
         test.strictEqual(resources?.total, null);
-        // console.log({resources});
       } catch (err) {
         console.log(err);
       } finally {
@@ -147,7 +148,6 @@ const runTests = async (
     'example/subscribe': async (test) => {
       try {
         const wait = await wsApi.example.wait({ delay: 1000 });
-        // console.log(client.api.chat)
         test.strictEqual(wait, 'done');
       } catch (err) {
         console.log(err);
@@ -203,7 +203,6 @@ const runTests = async (
   const results = [];
   console.log(`Run ${Object.entries(tests).length} tests`);
   for (const [caption, func] of Object.entries(tests)) {
-    // console.log({ caption, func });
     results.push(metatests.testAsync(caption, func));
   }
 
@@ -221,7 +220,6 @@ const runTests = async (
 function testHook({ url, path, argsString }) {
   return new Promise((resolve, reject) => {
     http.get(url + path + '?' + argsString, (res) => {
-      // console.log({ res });
       const { statusCode } = res;
       const contentType = res.headers['content-type'];
       let error;
@@ -250,7 +248,6 @@ function testHook({ url, path, argsString }) {
       res.on('end', () => {
         try {
           const parsedData = JSON.parse(rawData);
-          // console.log(parsedData);
           resolve(parsedData);
         } catch (e) {
           console.error(e.message);
@@ -283,11 +280,8 @@ const getHttpUrl = async () => {
 };
 
 const connect = async () => {
-  const { Metacom } = require('metacom/lib/client');
-
   const httpUrl = (await getHttpUrl()) + 'api';
   const wsUrl = `ws${httpUrl.substring(4)}`;
-  // const wsUrl = 'ws://127.0.0.1:8000/api';
 
   const wsClient = Metacom.create(wsUrl);
   const wsApi = wsClient.api;
