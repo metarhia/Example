@@ -2,7 +2,7 @@ async () => {
   if (application.worker.id === 'W1') {
     console.debug('Connect to redis');
   }
-  const client = npm.redis.createClient();
+  const client = npm.redis.createClient(config.redis.apiRedis);
   db.redis.client = client;
   client.on('error', () => {
     if (application.worker.id === 'W1') {
