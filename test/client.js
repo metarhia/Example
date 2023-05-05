@@ -21,13 +21,8 @@ const runTests = async (
 ) => {
   const tests = {
     'system/introspect': async (test) => {
-      const introspect = await wsClient.scaffold('system')('introspect')([
-        'auth',
-        'console',
-        'example',
-        'files',
-        'test',
-      ]);
+      const units = ['auth', 'console', 'example', 'files', 'test'];
+      const introspect = await wsClient.scaffold('system')('introspect')(units);
       test.strictSame(introspect?.auth?.restore?.[0], 'token');
       test.end();
     },
