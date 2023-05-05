@@ -1,13 +1,9 @@
 async ({ streamId, name }) => {
   const filePath = `./application/resources/${name}`;
   let exist = false;
-  try {
-    await node.fsp.access(filePath);
-    exist = true;
-  } catch (err) {
-    console.error(err);
-  }
-  if (exist) return { result: `File ${name} already exist on server` };
+  const toBool = [() => true, () => false];
+  const exists = await fs.promises.access(filePath).then(...toBool);
+  if (exists) return { result: `File ${name} already exist on server` };
   // Get incoming stream by streamId sent from client
   const readable = context.client.getStream(streamId);
   // Create nodejs stream to write file on server
