@@ -1,8 +1,6 @@
 name: Testing CI
 
-on:
-  - pull_request
-  - push # not for landing
+on: pull_request
 
 jobs:
   build:
