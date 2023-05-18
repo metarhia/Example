@@ -67,6 +67,7 @@ setTimeout(() => {
     });
     req.on('error', (err) => {
       console.log(err.stack);
+      process.exit(-1);
     });
     if (task.data) req.write(task.data);
     req.end();
