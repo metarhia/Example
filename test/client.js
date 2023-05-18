@@ -3,18 +3,17 @@
 const { Metacom } = require('metacom/lib/client');
 const metatests = require('metatests');
 
-const http = require('node:http');
 const { Blob } = require('node:buffer');
 const fs = require('node:fs');
 const fsp = fs.promises;
-const { loadConfig } = require('./loader');
+const { testHook, apiReady, getUrl } = require('./utils');
 
 const HOST = '127.0.0.1';
 const LOGIN = 'marcus';
 const PASSWORD = 'marcus';
 const ACCOUNT_ID = '2';
 const TEST_TIMEOUT = 10000;
-const START_TIMEOUT = 2000;
+const START_TIMEOUT = 1000;
 
 const runTests = async (wsClient, wsToken, wsApi, url) => {
   const tests = {
@@ -113,7 +112,7 @@ const runTests = async (wsClient, wsToken, wsApi, url) => {
     hook: async (test) => {
       const hook = await testHook({
         url,
-        path: '/hook',
+        path: '/api/hook',
         argsString: 'arg1=2&mem=3',
       });
 
@@ -174,60 +173,28 @@ const runTests = async (wsClient, wsToken, wsApi, url) => {
 
   await new Promise((resolve) => {
     const timer = setInterval(() => {
+      let done = true;
       for (const res of results) {
-        if (!res.done) break;
+        if (!res.done) {
+          done = false;
+          break;
+        }
       }
-      clearInterval(timer);
-      setTimeout(resolve, 2500);
+      if (done) {
+        clearInterval(timer);
+        resolve();
+      }
     }, 1000);
   });
 };
 
-function testHook({ url, path, argsString }) {
-  return new Promise((resolve, reject) => {
-    http.get(url + path + '?' + argsString, (res) => {
-      const { statusCode } = res;
-      const contentType = res.headers['content-type'];
-      let error;
-      // Any 2xx status code signals a successful response but
-      // here we're only checking for 200.
-      if (statusCode !== 200) {
-        error = new Error(`Request Failed.\n Status Code: ${statusCode}`);
-      } else if (!/^application\/json/.test(contentType)) {
-        error = new Error(
-          'Invalid content-type.\n' +
-            `Expected application/json but received ${contentType}`,
-        );
-      }
-      if (error) {
-        // Consume response data to free up memory
-        res.resume();
-        reject(error);
-      }
-
-      res.setEncoding('utf8');
-      let rawData = '';
-      res.on('data', (chunk) => {
-        rawData += chunk;
-      });
-      res.on('end', () => {
-        const parsedData = JSON.parse(rawData);
-        resolve(parsedData);
-      });
-    });
-  });
-}
-
-const getUrl = async () => {
-  const { protocol, ports } = await loadConfig('server');
-  return {
-    url: `${protocol}://${HOST}:${ports[0]}`,
-    wsUrl: `${protocol === 'http' ? 'ws' : 'wss'}://${HOST}:${ports[0]}`,
-  };
-};
-
-const connect = async () => {
+const main = async () => {
   const { url, wsUrl } = await getUrl();
+
+  await apiReady({
+    url,
+    timeout: START_TIMEOUT,
+  });
 
   const wsClient = Metacom.create(wsUrl + '/api');
   const wsApi = wsClient.api;
@@ -255,6 +222,4 @@ const connect = async () => {
 
 require('impress');
 
-setTimeout(async () => {
-  await connect();
-}, START_TIMEOUT);
+main();
