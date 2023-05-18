@@ -7,20 +7,16 @@ const http = require('node:http');
 const { Blob } = require('node:buffer');
 const fs = require('node:fs');
 const fsp = fs.promises;
+const { loadConfig } = require('./loader');
 
 const HOST = '127.0.0.1';
-const PORT = 8000;
+const LOGIN = 'marcus';
+const PASSWORD = 'marcus';
+const ACCOUNT_ID = '2';
 const TEST_TIMEOUT = 10000;
-const START_TIMEOUT = 1000;
+const START_TIMEOUT = 2000;
 
-const runTests = async (
-  wsClient,
-  wsToken,
-  wsApi,
-  httpClient,
-  // httpToken,
-  // httpApi,
-) => {
+const runTests = async (wsClient, wsToken, wsApi, url) => {
   const tests = {
     'system/introspect': async (test) => {
       const units = ['auth', 'console', 'example', 'files', 'test'];
@@ -87,84 +83,54 @@ const runTests = async (
     },
 
     'example/getClientInfo': async (test) => {
-      try {
-        const info = await wsApi.example.getClientInfo();
-        test.strictEqual(info?.result?.ip, '127.0.0.1');
-        test.strictEqual(info?.result?.token, wsToken);
-        test.strictEqual(info?.result?.accountId, '2');
-      } catch (err) {
-        console.log(err);
-      } finally {
-        test.end();
-      }
+      const info = await wsApi.example.getClientInfo();
+      test.strictEqual(info?.result?.ip, HOST);
+      test.strictEqual(info?.result?.token, wsToken);
+      test.strictEqual(info?.result?.accountId, ACCOUNT_ID);
+      test.end();
     },
 
     'example/redisSet + redisGet': async (test) => {
-      try {
-        const setting = await wsApi.example.redisSet({
-          key: 'MetarhiaExampleTest',
-          value: 1,
-        });
-        const getting = await wsApi.example.redisGet({
-          key: 'MetarhiaExampleTest',
-        });
-        test.strictEqual(setting?.result, 'OK');
-        test.strictEqual(getting?.result, '1');
-      } catch (err) {
-        test.errorCompare(err, new Error('Example exception'));
-      } finally {
-        test.end();
-      }
+      const setting = await wsApi.example.redisSet({
+        key: 'MetarhiaExampleTest',
+        value: 1,
+      });
+      const getting = await wsApi.example.redisGet({
+        key: 'MetarhiaExampleTest',
+      });
+      test.strictEqual(setting?.result, 'OK');
+      test.strictEqual(getting?.result, '1');
+
+      test.end();
     },
 
     'example/resources': async (test) => {
-      try {
-        const resources = await wsApi.example.resources();
-        test.strictEqual(resources?.total, null);
-      } catch (err) {
-        console.log(err);
-      } finally {
-        test.end();
-      }
+      const resources = await wsApi.example.resources();
+      test.strictEqual(resources?.total, null);
+      test.end();
     },
 
     hook: async (test) => {
-      let hook;
-      try {
-        hook = await testHook({
-          url: httpClient.url,
-          path: '/hook',
-          argsString: 'arg1=2&mem=3',
-        });
+      const hook = await testHook({
+        url,
+        path: '/hook',
+        argsString: 'arg1=2&mem=3',
+      });
 
-        test.strictEqual(hook?.success, true);
-      } catch (err) {
-        console.log(err);
-      } finally {
-        test.end();
-      }
+      test.strictEqual(hook?.success, true);
+      test.end();
     },
 
     'example/subscribe': async (test) => {
-      try {
-        const wait = await wsApi.example.wait({ delay: 1000 });
-        test.strictEqual(wait, 'done');
-      } catch (err) {
-        console.log(err);
-      } finally {
-        test.end();
-      }
+      const wait = await wsApi.example.wait({ delay: 1000 });
+      test.strictEqual(wait, 'done');
+      test.end();
     },
 
     'example/wait': async (test) => {
-      try {
-        const wait = await wsApi.example.wait({ delay: 1000 });
-        test.strictEqual(wait, 'done');
-      } catch (err) {
-        console.log(err);
-      } finally {
-        test.end();
-      }
+      const wait = await wsApi.example.wait({ delay: 1000 });
+      test.strictEqual(wait, 'done');
+      test.end();
     },
 
     'file/upload': async (test) => {
@@ -234,10 +200,9 @@ function testHook({ url, path, argsString }) {
         );
       }
       if (error) {
-        console.error(error.message);
         // Consume response data to free up memory
         res.resume();
-        reject();
+        reject(error);
       }
 
       res.setEncoding('utf8');
@@ -246,66 +211,49 @@ function testHook({ url, path, argsString }) {
         rawData += chunk;
       });
       res.on('end', () => {
-        try {
-          const parsedData = JSON.parse(rawData);
-          resolve(parsedData);
-        } catch (e) {
-          console.error(e.message);
-        }
+        const parsedData = JSON.parse(rawData);
+        resolve(parsedData);
       });
     });
   });
 }
 
-const getHttpUrl = async () => {
-  const request = {
-    host: HOST,
-    port: PORT,
-    agent: false,
-    method: 'GET',
-    path: '/',
+const getUrl = async () => {
+  const { protocol, ports } = await loadConfig('server');
+  return {
+    url: `${protocol}://${HOST}:${ports[0]}`,
+    wsUrl: `${protocol === 'http' ? 'ws' : 'wss'}://${HOST}:${ports[0]}`,
   };
-
-  return new Promise((resolve, reject) => {
-    const req = http.request(request);
-    req.on('response', (res) => {
-      resolve(res.headers.location);
-    });
-
-    req.on('error', (err) => {
-      reject(err);
-    });
-    req.end();
-  });
 };
 
 const connect = async () => {
-  const httpUrl = (await getHttpUrl()) + 'api';
-  const wsUrl = `ws${httpUrl.substring(4)}`;
+  const { url, wsUrl } = await getUrl();
 
-  const wsClient = Metacom.create(wsUrl);
+  const wsClient = Metacom.create(wsUrl + '/api');
   const wsApi = wsClient.api;
   await wsClient.load('auth', 'console', 'example', 'files');
-  const res = await wsApi.auth.signin({ login: 'marcus', password: 'marcus' });
+  const res = await wsApi.auth.signin({ login: LOGIN, password: PASSWORD });
   const wsToken = res.token;
 
-  const httpClient = Metacom.create(httpUrl);
-  const httpApi = httpClient.api;
-  await httpClient.load('auth', 'console', 'example', 'files');
-  const httpSignin = await httpApi.auth.signin({
-    login: 'marcus',
-    password: 'marcus',
-  });
-  const httpToken = httpSignin?.token;
+  // const httpClient = Metacom.create(url + '/api');
+  // const httpApi = httpClient.api;
+  // await httpClient.load('auth', 'console', 'example', 'files');
+  // const httpSignin = await httpApi.auth.signin({
+  //   login: LOGIN,
+  //   password: PASSWORD,
+  // });
+  // const httpToken = httpSignin?.token;
 
   wsClient.on('close', process.exit);
   setTimeout(() => {
     console.info('Stop tests by timeout');
     wsClient.close();
   }, TEST_TIMEOUT);
-  await runTests(wsClient, wsToken, wsApi, httpClient, httpToken, httpApi);
+  await runTests(wsClient, wsToken, wsApi, url);
   wsClient.close();
 };
+
+require('impress');
 
 setTimeout(async () => {
   await connect();
