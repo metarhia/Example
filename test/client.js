@@ -142,7 +142,7 @@ const runTests = async (wsClient, wsToken, wsApi, url) => {
       const uploader = wsClient.createBlobUploader(blob);
       // Prepare backend file consumer
       const res = await wsApi.files.upload({
-        streamId: uploader.streamId,
+        streamId: uploader.id,
         name: file,
       });
       test.strictEqual(res?.result, 'Stream initialized');
@@ -215,6 +215,7 @@ const main = async () => {
   setTimeout(() => {
     console.info('Stop tests by timeout');
     wsClient.close();
+    process.exit(-1);
   }, TEST_TIMEOUT);
   await runTests(wsClient, wsToken, wsApi, url);
   wsClient.close();
