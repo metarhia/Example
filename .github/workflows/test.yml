@@ -23,7 +23,7 @@ jobs:
 
       - name: Start docker containers
         run: |
-          docker-compose -f test-docker-compose.yml up  -d pg-example redis-example
+          docker-compose -f test-docker-compose.yml up  -d
           sleep 10  # wait for database to be ready
 
       - name: Use Node.js ${{ matrix.node }}
