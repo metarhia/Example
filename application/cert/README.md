@@ -8,15 +8,15 @@
 
 ```
 dnf -y install certbot
-sudo certbot certonly --standalone
+certbot certonly --standalone -d www.domain.com -d domain.com -m your.name@domain.com --agree-tos --no-eff-email
+yes | cp /etc/letsencrypt/live/domain.com/fullchain.pem ~/domain.com/application/cert/cert.pem
+yes | cp /etc/letsencrypt/live/domain.com/privkey.pem ~/domain.com/application/cert/key.pem
 ```
 
-or
+Or use impress web server for challenge exchange:
 
 ```
-curl -O https://dl.eff.org/certbot-auto
-chmod a+x certbot-auto
-./certbot-auto certonly
+certbot certonly --webroot -w ~/domain.com/application/static -d www.domain.com -d domain.com -m your.name@domain.com --agree-tos --no-eff-email
 ```
 
 ## Self-signed (for testing)
