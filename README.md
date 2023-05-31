@@ -57,7 +57,7 @@ let's start with
 - Start your project modifying this starter kit
 - Before running server initialize the DB:
   - First of all, make sure you have PostgreSQL installed (prefer 12.x).
-  - Run database initialization script: `db/setup.sh`
+  - Run database initialization script: `database/setup.sh`
 - Run project: `node server.js` and stop with Ctrl+C
 - Ask questions in https://t.me/nodeua and post issues on
   [github](https://github.com/HowProgrammingWorks/NodejsStarterKit/issues)
