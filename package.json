@@ -68,7 +68,7 @@
   "dependencies": {
     "impress": "github:MarhiievHE/impress#metacom-master",
     "metasql": "^2.1.4",
-    "pg": "^8.10.0",
+    "pg": "^8.11.0",
     "redis": "^4.6.5"
   }
 }
