@@ -1,4 +1,4 @@
 ({
-  size: '50mb',
-  maxFileSize: '10mb',
+  size: '50 mb',
+  maxFileSize: '10 mb',
 });
