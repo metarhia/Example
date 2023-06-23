@@ -10,6 +10,7 @@
     "db": "readonly",
     "bus": "readonly",
     "domain": "readonly",
-    "metarhia": "readonly"
+    "metarhia": "readonly",
+    "DomainError": "readonly"
   }
 }
