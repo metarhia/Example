@@ -53,22 +53,22 @@
     "node": "16 || 18 || 19 || 20"
   },
   "devDependencies": {
-    "@types/node": "^20.2.5",
+    "@types/node": "^20.3.2",
     "@types/pg": "^8.6.6",
     "@types/ws": "^8.5.5",
-    "eslint": "^8.39.0",
+    "eslint": "^8.43.0",
     "eslint-config-metarhia": "^8.1.0",
     "eslint-config-prettier": "^8.8.0",
-    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-prettier": "^4.2.1",
     "metatests": "^0.8.2",
     "prettier": "^2.8.7",
-    "typescript": "^5.0.4"
+    "typescript": "^5.1.6"
   },
   "dependencies": {
-    "impress": "^3.0.0-alpha.14",
+    "impress": "^3.0.0",
     "metasql": "^3.0.0-alpha.1",
-    "pg": "^8.11.0",
+    "pg": "^8.11.1",
     "redis": "^4.6.5"
   }
 }
