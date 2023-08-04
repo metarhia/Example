@@ -1,4 +1,4 @@
-# Metarhia Example Server for Node.js
+# Metarhia application example for Node.js
 
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/metarhia/Example/blob/master/LICENSE)
 
