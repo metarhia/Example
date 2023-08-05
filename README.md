@@ -2,7 +2,9 @@
 
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/metarhia/Example/blob/master/LICENSE)
 
-## Concept
+Metarhia application example demonstrates how to build an application using Metarchia stack.
+
+## Introduction
 
 This is a logical continuation of
 [Node.js Starter Kit](https://github.com/HowProgrammingWorks/NodejsStarterKit)
@@ -10,24 +12,45 @@ from [How Programming Works](https://github.com/HowProgrammingWorks) software
 development course moving all system code to dependencies, namely using
 [Metarhia technology stack](https://github.com/metarhia).
 
+The purpose of this starter kit is to show best practices for Metarhia and
+Metaserverless, to give structure and architecture example, to illustrate
+simplicity and efficiency of mentioned technologies.
+
+This example are optimized for reliability, scalability,
+performance and security. So if you need readability and want to study code,
+let's start with
+[Node.js Starter Kit](https://github.com/HowProgrammingWorks/NodejsStarterKit).
+
 You can begin development from this starter kit but having in mind future
 production deployment and further moving application to
 [Metaserverless cloud](https://github.com/Metaserverless) based on Metarhia
 technology stack and Node.js.
 
-The purpose of this starter kit is to show best practices for Metarhia and
-Metaserverless, to give structure and architecture example, to illustrate
-simplicity and efficiency of mentioned technologies.
+## Quick Start
 
-All parts of this implementation are optimized for reliability, scalability,
-performance and security. So if you need readability and want to study code,
-let's start with
-[Node.js Starter Kit](https://github.com/HowProgrammingWorks/NodejsStarterKit).
+If you have Docker installed to run the project, use the command: `docker-compose up`.
+
+In this scenario, you can skip some of the following sections.
+
+## Requirements
+
+- Node.js version 16 or newer
+- PostgreSQL. version 12.x is prefered
+
+## Usage
+
+- Fork and clone this repository (optionally subscribe to repo changes)
+- Run `npm i` to install dependencies and generate RSA certificate
+- Remove unneeded dependencies if your project doesn't require them
+- Add your license to `LICENSE` file but don't remove starter kit license
+- Before running a project, run database init script: `database/setup.sh`:
+- Run the project: `node server.js` (it can be stopped by pressing Ctrl+C);
+- Feel free to ask questions on https://t.me/nodeua and share any ideas or report bugs by posting issues.
 
 ## Feature list
 
 - Serve API with auto routing, HTTP(S), WS(S)
-- Server code live reload with file system watch
+- Hot Code Reloading
 - Auto dependency loader and plugins
 - Graceful shutdown and application reload
 - Minimum code size and dependencies
@@ -45,23 +68,6 @@ let's start with
 - API method execution timeout
 - Load balancing for scaling
 - Prototype polution prevention
-- Better code isolation
-
-## Usage
-
-- You need node.js v16 or later
-- Fork and clone this repository (optionally subscribe to repo changes)
-- Run `npm i` to install dependencies and generate RSA certificate
-- Remove unneeded dependencies if your project doesn't require them
-- Add your license to `LICENSE` file but don't remove starter kit license
-- Start your project modifying this starter kit
-- If you have Docker and Docker Compose installed to run the project, use the command: `docker-compose up`
-- Before running server initialize the DB:
-  - First of all, make sure you have PostgreSQL installed (prefer 12.x).
-  - Run database initialization script: `database/setup.sh`
-- Run project: `node server.js` and stop with Ctrl+C
-- Ask questions in https://t.me/nodeua and post issues on
-  [github](https://github.com/HowProgrammingWorks/NodejsStarterKit/issues)
 
 ## License
 
