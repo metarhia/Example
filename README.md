@@ -16,8 +16,7 @@ The purpose of this starter kit is to show best practices for Metarhia and
 Metaserverless, to give structure and architecture example, to illustrate
 simplicity and efficiency of mentioned technologies.
 
-This example are optimized for reliability, scalability,
-performance and security. So if you need readability and want to study code,
+This example is optimized for reliability, scalability, performance, and security. So if you need readability and want to study code,
 let's start with
 [Node.js Starter Kit](https://github.com/HowProgrammingWorks/NodejsStarterKit).
 
