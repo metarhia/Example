@@ -8,7 +8,7 @@ require('impress');
 
 const HOST = '127.0.0.1';
 const PORT = 8000;
-const START_TIMEOUT = 2000;
+const START_DELAY = 4000;
 const TEST_TIMEOUT = 10000;
 
 let callId = 0;
@@ -81,7 +81,7 @@ const main = async () => {
   const { ports } = await loadConfig('server');
   await apiReady({
     url: `http://${HOST}:${ports[0]}`,
-    timeout: START_TIMEOUT,
+    timeout: START_DELAY,
   });
 
   let error = false;

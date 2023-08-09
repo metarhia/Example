@@ -13,7 +13,7 @@ const LOGIN = 'marcus';
 const PASSWORD = 'marcus';
 const ACCOUNT_ID = '2';
 const TEST_TIMEOUT = 10000;
-const START_TIMEOUT = 1000;
+const START_DELAY = 4000;
 
 const runTests = async (wsClient, wsToken, wsApi, url) => {
   const tests = {
@@ -193,7 +193,7 @@ const main = async () => {
 
   await apiReady({
     url,
-    timeout: START_TIMEOUT,
+    timeout: START_DELAY,
   });
 
   const wsClient = Metacom.create(wsUrl + '/api');
