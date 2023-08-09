@@ -6,7 +6,7 @@ const metatests = require('metatests');
 const { Blob } = require('node:buffer');
 const fs = require('node:fs');
 const fsp = fs.promises;
-const { testHook, apiReady, getUrl } = require('./utils');
+const { testHook, apiReady, getUrl } = require('./utils.js');
 
 const HOST = '127.0.0.1';
 const LOGIN = 'marcus';
