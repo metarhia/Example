@@ -329,12 +329,15 @@ function commandLoop() {
 
 class Application {
   constructor() {
+    this.logged = false;
     this.controlInput = document.getElementById('controlInput');
     this.controlBrowse = document.getElementById('controlBrowse');
     this.keyboard = new Keyboard(this);
     this.scroller = new Scroller(this);
     const protocol = location.protocol === 'http:' ? 'ws' : 'wss';
     this.metacom = Metacom.create(`${protocol}://${location.host}/api`);
+    window.api = this.metacom.api;
+    window.application = this;
   }
 
   clear() {
@@ -464,16 +467,14 @@ class Application {
 }
 
 window.addEventListener('load', async () => {
-  window.application = new Application();
-  window.api = window.application.metacom.api;
+  const application = new Application();
   await application.metacom.load('auth', 'console', 'example', 'files');
   const token = localStorage.getItem('metarhia.session.token');
-  let logged = false;
   if (token) {
     const res = await api.auth.restore({ token });
-    logged = res.status === 'logged';
+    application.logged = res.status === 'logged';
   }
-  if (!logged) {
+  if (!application.logged) {
     const res = await api.auth.signin({ login: 'marcus', password: 'marcus' });
     if (res.token) {
       localStorage.setItem('metarhia.session.token', res.token);
@@ -483,7 +484,3 @@ window.addEventListener('load', async () => {
   application.print(text);
   commandLoop();
 });
-
-if (navigator.serviceWorker) {
-  navigator.serviceWorker.register('/worker.js');
-}

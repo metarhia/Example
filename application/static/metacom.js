@@ -40,7 +40,7 @@ class Metacom extends EventEmitter {
     this.active = false;
     this.connected = false;
     this.opening = null;
-    this.lastActivity = new Date().getTime();
+    this.lastActivity = Date.now();
     this.callTimeout = options.callTimeout || CALL_TIMEOUT;
     this.pingInterval = options.pingInterval || PING_INTERVAL;
     this.reconnectTimeout = options.reconnectTimeout || RECONNECT_TIMEOUT;
@@ -86,7 +86,7 @@ class Metacom extends EventEmitter {
 
   async message(data) {
     if (data === '{}') return;
-    this.lastActivity = new Date().getTime();
+    this.lastActivity = Date.now();
     let packet;
     try {
       packet = JSON.parse(data);
@@ -102,8 +102,7 @@ class Metacom extends EventEmitter {
         this.calls.delete(id);
         clearTimeout(timeout);
         if (packet.error) {
-          reject(new MetacomError(packet.error));
-          return;
+          return void reject(new MetacomError(packet.error));
         }
         resolve(packet.result);
       } else if (type === 'event') {
@@ -220,7 +219,7 @@ class WebsocketTransport extends Metacom {
 
     this.ping = setInterval(() => {
       if (this.active) {
-        const interval = new Date().getTime() - this.lastActivity;
+        const interval = Date.now() - this.lastActivity;
         if (interval > this.pingInterval) this.send('{}');
       }
     }, this.pingInterval);
@@ -247,7 +246,7 @@ class WebsocketTransport extends Metacom {
 
   send(data) {
     if (!this.connected) return;
-    this.lastActivity = new Date().getTime();
+    this.lastActivity = Date.now();
     this.socket.send(data);
   }
 }
@@ -265,7 +264,7 @@ class HttpTransport extends Metacom {
   }
 
   send(data) {
-    this.lastActivity = new Date().getTime();
+    this.lastActivity = Date.now();
     fetch(this.url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
