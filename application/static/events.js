@@ -54,10 +54,7 @@ class EventEmitter {
   }
 
   clear(name) {
-    if (!name) {
-      this.events.clear();
-      return;
-    }
+    if (!name) return void this.events.clear();
     this.events.delete(name);
   }
 
