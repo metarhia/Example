@@ -48,7 +48,7 @@ class MetaReadable extends EventEmitter {
   }
 
   async finalize(writable) {
-    const waitWritableEvent = EventEmitter.once.bind(writable);
+    const waitWritableEvent = EventEmitter.once.bind(this, writable);
     const onError = () => this.terminate();
     writable.once('error', onError);
     for await (const chunk of this) {
@@ -132,12 +132,12 @@ class MetaReadable extends EventEmitter {
 }
 
 class MetaWritable extends EventEmitter {
-  constructor(id, name, size, transport) {
+  constructor(transport, options = {}) {
     super();
-    this.id = id;
-    this.name = name;
-    this.size = size;
     this.transport = transport;
+    this.id = options.id;
+    this.name = options.name;
+    this.size = options.size;
     this.init();
   }
 

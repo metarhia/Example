@@ -40,7 +40,7 @@ class Metacom extends EventEmitter {
     this.active = false;
     this.connected = false;
     this.opening = null;
-    this.lastActivity = new Date().getTime();
+    this.lastActivity = Date.now();
     this.callTimeout = options.callTimeout || CALL_TIMEOUT;
     this.pingInterval = options.pingInterval || PING_INTERVAL;
     this.reconnectTimeout = options.reconnectTimeout || RECONNECT_TIMEOUT;
@@ -86,52 +86,55 @@ class Metacom extends EventEmitter {
 
   async message(data) {
     if (data === '{}') return;
-    this.lastActivity = new Date().getTime();
+    this.lastActivity = Date.now();
     let packet;
     try {
       packet = JSON.parse(data);
     } catch {
       return;
     }
-    const { type, id, method } = packet;
-    if (id) {
-      if (type === 'callback') {
-        const promised = this.calls.get(id);
-        if (!promised) return;
-        const [resolve, reject, timeout] = promised;
-        this.calls.delete(id);
-        clearTimeout(timeout);
-        if (packet.error) {
-          reject(new MetacomError(packet.error));
-          return;
-        }
-        resolve(packet.result);
-      } else if (type === 'event') {
-        const [unit, name] = method.split('/');
-        const metacomUnit = this.api[unit];
-        if (metacomUnit) metacomUnit.emit(name, packet.data);
-      } else if (type === 'stream') {
-        const { name, size, status } = packet;
-        const stream = this.streams.get(id);
-        if (name && typeof name === 'string' && Number.isSafeInteger(size)) {
-          if (stream) {
-            console.error(new Error(`Stream ${name} is already initialized`));
-          } else {
-            const streamData = { id, name, size };
-            const stream = new MetaReadable(streamData);
-            this.streams.set(id, stream);
-          }
-        } else if (!stream) {
-          console.error(new Error(`Stream ${id} is not initialized`));
-        } else if (status === 'end') {
-          await stream.close();
-          this.streams.delete(id);
-        } else if (status === 'terminate') {
-          await stream.terminate();
-          this.streams.delete(id);
+    const { type, id, name } = packet;
+    if (type === 'event') {
+      const [unit, eventName] = name.split('/');
+      const metacomUnit = this.api[unit];
+      if (metacomUnit) metacomUnit.post(eventName, packet.data);
+      return;
+    }
+    if (!id) {
+      console.error(new Error('Packet structure error'));
+      return;
+    }
+    if (type === 'callback') {
+      const promised = this.calls.get(id);
+      if (!promised) return;
+      const [resolve, reject, timeout] = promised;
+      this.calls.delete(id);
+      clearTimeout(timeout);
+      if (packet.error) {
+        return void reject(new MetacomError(packet.error));
+      }
+      resolve(packet.result);
+    } else if (type === 'stream') {
+      const { name, size, status } = packet;
+      const stream = this.streams.get(id);
+      if (name && typeof name === 'string' && Number.isSafeInteger(size)) {
+        if (stream) {
+          console.error(new Error(`Stream ${name} is already initialized`));
         } else {
-          console.error(new Error('Stream packet structure error'));
+          const streamData = { id, name, size };
+          const stream = new MetaReadable(streamData);
+          this.streams.set(id, stream);
         }
+      } else if (!stream) {
+        console.error(new Error(`Stream ${id} is not initialized`));
+      } else if (status === 'end') {
+        await stream.close();
+        this.streams.delete(id);
+      } else if (status === 'terminate') {
+        await stream.terminate();
+        this.streams.delete(id);
+      } else {
+        console.error(new Error('Stream packet structure error'));
       }
     }
   }
@@ -220,7 +223,7 @@ class WebsocketTransport extends Metacom {
 
     this.ping = setInterval(() => {
       if (this.active) {
-        const interval = new Date().getTime() - this.lastActivity;
+        const interval = Date.now() - this.lastActivity;
         if (interval > this.pingInterval) this.send('{}');
       }
     }, this.pingInterval);
@@ -247,7 +250,7 @@ class WebsocketTransport extends Metacom {
 
   send(data) {
     if (!this.connected) return;
-    this.lastActivity = new Date().getTime();
+    this.lastActivity = Date.now();
     this.socket.send(data);
   }
 }
@@ -265,7 +268,7 @@ class HttpTransport extends Metacom {
   }
 
   send(data) {
-    this.lastActivity = new Date().getTime();
+    this.lastActivity = Date.now();
     fetch(this.url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
