@@ -7,7 +7,7 @@ const http = require('node:http');
 const RUN_OPTIONS = { timeout: 5000, displayErrors: false };
 const INTERVAL = 500;
 
-const load = async (filePath, sandbox) => {
+const load = async (filePath, sandbox) => { // TODO Use metavm
   const src = await fs.readFile(filePath, 'utf8');
   const code = `'use strict';\n${src}`;
   const script = new vm.Script(code);
