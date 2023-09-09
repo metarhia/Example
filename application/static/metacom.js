@@ -97,7 +97,7 @@ class Metacom extends EventEmitter {
     if (type === 'event') {
       const [unit, eventName] = name.split('/');
       const metacomUnit = this.api[unit];
-      if (metacomUnit) metacomUnit.post(eventName, packet.data);
+      if (metacomUnit) metacomUnit.emit(eventName, packet.data);
       return;
     }
     if (!id) {
@@ -161,11 +161,6 @@ class Metacom extends EventEmitter {
       for (const methodName of methodNames) {
         methods[methodName] = request(methodName);
       }
-      methods.on('*', (event, data) => {
-        const name = unit + '/' + event;
-        const packet = { type: 'event', name, data };
-        this.send(JSON.stringify(packet));
-      });
       this.api[unit] = methods;
     }
   }
