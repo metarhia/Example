@@ -43,7 +43,7 @@
   "main": "server.js",
   "types": "types/global.d.ts",
   "scripts": {
-    "test": "npm run lint && npm run types && MODE=test node --test-reporter=spec server.js",
+    "test": "npm run lint && npm run types && MODE=test node server.js",
     "types": "tsc",
     "lint": "eslint . && prettier -c \"**/*.js\" \"**/*.json\" \"**/*.md\" \"**/*.yml\" \"**/*.ts\"",
     "fmt": "prettier --write \"**/*.js\" \"**/*.json\" \"**/*.md\" \"**/*.yml\" \"**/*.ts\"",
