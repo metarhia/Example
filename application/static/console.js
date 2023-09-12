@@ -1,4 +1,4 @@
-import { Metacom } from './metacom.js';
+import { Metacom } from '/metacom.js';
 
 const ALPHA_UPPER = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 const ALPHA_LOWER = 'abcdefghijklmnopqrstuvwxyz';
