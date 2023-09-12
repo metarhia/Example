@@ -1,4 +1,4 @@
-import EventEmitter from './events.js';
+import EventEmitter from '/events.js';
 
 const ID_LENGTH = 4;
 
