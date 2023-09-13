@@ -7,6 +7,7 @@
     "api": "readonly"
   },
   "rules": {
-    "id-denylist": [2, "global"]
+    "id-denylist": [2, "global"],
+    "import/no-unresolved": "off"
   }
 }
