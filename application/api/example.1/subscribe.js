@@ -1,7 +1,13 @@
 ({
   access: 'public',
 
-  method: async () => {
+  method: async ({ test = false }) => {
+    if (test) {
+      setTimeout(async () => {
+        const stats = await lib.resmon.getStatistics();
+        context.client.emit('example/resmon', stats);
+      }, 500);
+    }
     setInterval(async () => {
       const stats = await lib.resmon.getStatistics();
       context.client.emit('example/resmon', stats);
