@@ -1,7 +1,9 @@
 'use strict';
 
 const { Metacom } = require('metacom/lib/client');
-const metatests = require('metatests');
+
+const test = require('node:test');
+const assert = require('node:assert/strict');
 
 const { Blob } = require('node:buffer');
 const fs = require('node:fs');
@@ -17,79 +19,67 @@ const START_DELAY = 4000;
 
 const runTests = async (wsClient, wsToken, wsApi, url) => {
   const tests = {
-    'system/introspect': async (test) => {
+    'system/introspect': async () => {
       const units = ['auth', 'console', 'example', 'files', 'test'];
       const introspect = await wsClient.scaffold('system')('introspect')(units);
-      test.strictSame(introspect?.auth?.restore?.[0], 'token');
-      test.end();
+      assert.strictEqual(introspect?.auth?.restore?.[0], 'token');
     },
 
-    'example/add': async (test) => {
+    'example/add': async () => {
       const add = await wsApi.example.add({ a: 1, b: 2 });
-      test.strictSame(add, 3);
-      test.end();
+      assert.strictEqual(add, 3);
     },
 
-    'example/citiesByCountry': async (test) => {
+    'example/citiesByCountry': async () => {
       const cities = await wsApi.example.citiesByCountry({
         countryId: 1,
       });
-      test.strictEqual(cities?.result, 'success');
-      test.strictEqual(Array.isArray(cities?.data), true);
-      test.end();
+      assert.strictEqual(cities?.result, 'success');
+      assert.strictEqual(Array.isArray(cities?.data), true);
     },
 
-    'example/customError': async (test) => {
+    'example/customError': async () => {
       try {
         await wsApi.example.customError();
       } catch (customError) {
-        test.errorCompare(customError, new Error('Return custom error', 12345));
-        test.strictEqual(customError?.code, 12345);
-      } finally {
-        test.end();
+        assert.strictEqual(customError.message, 'Return custom error');
+        assert.strictEqual(customError?.code, 12345);
       }
     },
 
-    'example/customException': async (test) => {
+    'example/customException': async () => {
       try {
         await wsApi.example.customException();
       } catch (customError) {
-        test.errorCompare(customError, new Error('Custom ecxeption', 12345));
-        test.strictEqual(customError?.code, 12345);
-      } finally {
-        test.end();
+        assert.strictEqual(customError.message, 'Custom ecxeption');
+        assert.strictEqual(customError?.code, 12345);
       }
     },
 
-    'example/error': async (test) => {
+    'example/error': async () => {
       try {
         await wsApi.example.error();
       } catch (err) {
-        test.errorCompare(err, new Error('Return error'));
-      } finally {
-        test.end();
+        assert.strictEqual(err.message, 'Return error');
       }
     },
 
-    'example/exception': async (test) => {
+    'example/exception': async () => {
       try {
         await wsApi.example.exception();
       } catch (err) {
-        test.errorCompare(err, new Error('Example exception'));
-      } finally {
-        test.end();
+        assert.strictEqual(err.message, 'Internal Server Error');
       }
     },
 
-    'example/getClientInfo': async (test) => {
+    'example/getClientInfo': async () => {
       const info = await wsApi.example.getClientInfo();
-      test.strictEqual(info?.result?.ip, HOST);
-      test.strictEqual(info?.result?.token, wsToken);
-      test.strictEqual(info?.result?.accountId, ACCOUNT_ID);
-      test.end();
+      assert.strictEqual(info?.result?.ip, HOST);
+      assert.strictEqual(info?.result?.token, wsToken);
+      assert.strictEqual(info?.result?.accountId, ACCOUNT_ID);
     },
 
-    'example/redisSet + redisGet': async (test) => {
+    'example/redisSet + redisGet': async () => {
       const setting = await wsApi.example.redisSet({
         key: 'MetarhiaExampleTest',
         value: 1,
@@ -97,42 +87,42 @@ const runTests = async (wsClient, wsToken, wsApi, url) => {
       const getting = await wsApi.example.redisGet({
         key: 'MetarhiaExampleTest',
       });
-      test.strictEqual(setting?.result, 'OK');
-      test.strictEqual(getting?.result, '1');
-
-      test.end();
+      assert.strictEqual(setting?.result, 'OK');
+      assert.strictEqual(getting?.result, '1');
     },
 
-    'example/resources': async (test) => {
+    'example/resources': async () => {
       const resources = await wsApi.example.resources();
-      test.strictEqual(resources?.total, null);
-      test.end();
+      assert.strictEqual(resources?.total, null);
     },
 
-    hook: async (test) => {
+    hook: async () => {
       const hook = await testHook({
         url,
         path: '/api/hook',
         argsString: 'arg1=2&mem=3',
       });
 
-      test.strictEqual(hook?.success, true);
-      test.end();
+      assert.strictEqual(hook?.success, true);
     },
 
-    'example/subscribe': async (test) => {
+    'example/subscribe': async () => {
+      const res = await wsApi.example.subscribe({ test: true });
+      assert.deepEqual(res, { subscribed: 'resmon' });
+      await new Promise((resolve) => {
+        wsApi.example.once('resmon', (event) => {
+          console.log({ event });
+          resolve();
+        });
+      });
+    },
+
+    'example/wait': async () => {
       const wait = await wsApi.example.wait({ delay: 1000 });
-      test.strictEqual(wait, 'done');
-      test.end();
+      assert.strictEqual(wait, 'done');
     },
 
-    'example/wait': async (test) => {
-      const wait = await wsApi.example.wait({ delay: 1000 });
-      test.strictEqual(wait, 'done');
-      test.end();
-    },
-
-    'file/upload': async (test) => {
+    'file/upload': async () => {
       const file = 'sunset.jpg';
       const path = './test/uploading/' + file;
       const content = await fsp.readFile(path);
@@ -145,13 +135,12 @@ const runTests = async (wsClient, wsToken, wsApi, url) => {
         streamId: uploader.id,
         name: file,
       });
-      test.strictEqual(res?.result, 'Stream initialized');
+      assert.strictEqual(res?.result, 'Stream initialized');
       // Start uploading stream and wait for its end
       await uploader.upload();
-      test.end();
     },
 
-    'example/uploadFile': async (test) => {
+    'example/uploadFile': async () => {
       const file = 'sunset.jpg';
       const path = './test/uploading/' + file;
       const content = await fsp.readFile(path);
@@ -160,32 +149,17 @@ const runTests = async (wsClient, wsToken, wsApi, url) => {
         data: content.toJSON(),
         name: file,
       });
-      test.strictEqual(res?.uploaded, content?.length);
-      test.end();
+      assert.strictEqual(res?.uploaded, content?.length);
     },
   };
 
-  const results = [];
+  const prom = [];
   console.log(`Run ${Object.entries(tests).length} tests`);
   for (const [caption, func] of Object.entries(tests)) {
-    results.push(metatests.testAsync(caption, func));
+    prom.push(test.test(caption, func));
   }
 
-  await new Promise((resolve) => {
-    const timer = setInterval(() => {
-      let done = true;
-      for (const res of results) {
-        if (!res.done) {
-          done = false;
-          break;
-        }
-      }
-      if (done) {
-        clearInterval(timer);
-        resolve();
-      }
-    }, 1000);
-  });
+  await Promise.allSettled(prom);
 };
 
 const main = async () => {
@@ -201,15 +175,6 @@ const main = async () => {
   await wsClient.load('auth', 'console', 'example', 'files');
   const res = await wsApi.auth.signin({ login: LOGIN, password: PASSWORD });
   const wsToken = res.token;
-
-  // const httpClient = Metacom.create(url + '/api');
-  // const httpApi = httpClient.api;
-  // await httpClient.load('auth', 'console', 'example', 'files');
-  // const httpSignin = await httpApi.auth.signin({
-  //   login: LOGIN,
-  //   password: PASSWORD,
-  // });
-  // const httpToken = httpSignin?.token;
 
   wsClient.on('close', process.exit);
   setTimeout(() => {
