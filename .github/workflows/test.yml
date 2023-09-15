@@ -42,11 +42,6 @@ jobs:
 
       - run: npm test
 
-      # - name: Prepearing api docker container for integration tests
-      #   run: |
-      #     docker-compose -f test-api-docker-compose.yml up  -d
-      #     sleep 2  # wait for api to be ready
-
       - name: Client test
         run: |
           node server.js > /dev/null&
