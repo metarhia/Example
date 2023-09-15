@@ -21,6 +21,27 @@ services:
     ports:
       - 127.0.0.1:6379:6379
     restart: always
+
+  api-example:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: api-example
+    environment:
+      - DB_HOST=pg-example
+      - REDIS_HOST=redis-example
+      - REDIS_PORT=6379
+    volumes:
+      - ./application:/usr/server/application
+    depends_on:
+      - pg-example
+      - redis-example
+    ports:
+      - 127.0.0.1:8000:8000
+      - 127.0.0.1:8001:8001
+      - 127.0.0.1:8002:8002
+    restart: always
+
 networks:
   default:
     name: api-example-network

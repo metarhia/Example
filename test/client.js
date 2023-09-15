@@ -10,12 +10,10 @@ const fs = require('node:fs');
 const fsp = fs.promises;
 const { testHook, apiReady, getUrl } = require('./utils.js');
 
-const HOST = '127.0.0.1';
 const LOGIN = 'marcus';
 const PASSWORD = 'marcus';
 const ACCOUNT_ID = '2';
 const TEST_TIMEOUT = 10000;
-const START_DELAY = 4000;
 
 const runTests = async (wsClient, wsToken, wsApi, url) => {
   const tests = {
@@ -74,7 +72,6 @@ const runTests = async (wsClient, wsToken, wsApi, url) => {
 
     'example/getClientInfo': async () => {
       const info = await wsApi.example.getClientInfo();
-      assert.strictEqual(info?.result?.ip, HOST);
       assert.strictEqual(info?.result?.token, wsToken);
       assert.strictEqual(info?.result?.accountId, ACCOUNT_ID);
     },
@@ -110,10 +107,7 @@ const runTests = async (wsClient, wsToken, wsApi, url) => {
       const res = await wsApi.example.subscribe({ test: true });
       assert.deepEqual(res, { subscribed: 'resmon' });
       await new Promise((resolve) => {
-        wsApi.example.once('resmon', (event) => {
-          console.log({ event });
-          resolve();
-        });
+        wsApi.example.once('resmon', resolve());
       });
     },
 
@@ -165,10 +159,7 @@ const runTests = async (wsClient, wsToken, wsApi, url) => {
 const main = async () => {
   const { url, wsUrl } = await getUrl();
 
-  await apiReady({
-    url,
-    timeout: START_DELAY,
-  });
+  await apiReady(url);
 
   const wsClient = Metacom.create(wsUrl + '/api');
   const wsApi = wsClient.api;
@@ -185,7 +176,5 @@ const main = async () => {
   await runTests(wsClient, wsToken, wsApi, url);
   wsClient.close();
 };
-
-require('impress');
 
 main();

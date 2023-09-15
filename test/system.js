@@ -4,11 +4,8 @@ const http = require('node:http');
 const assert = require('node:assert').strict;
 const { apiReady, loadConfig } = require('./utils');
 
-require('impress');
-
 const HOST = '127.0.0.1';
 const PORT = 8000;
-const START_DELAY = 4000;
 const TEST_TIMEOUT = 10000;
 
 let callId = 0;
@@ -79,10 +76,7 @@ const requestProm = async (request, task) =>
 
 const main = async () => {
   const { ports } = await loadConfig('server');
-  await apiReady({
-    url: `http://${HOST}:${ports[0]}`,
-    timeout: START_DELAY,
-  });
+  await apiReady(`http://${HOST}:${ports[0]}`);
 
   let error = false;
   tasks.forEach(async (task) => {

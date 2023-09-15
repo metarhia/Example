@@ -10,8 +10,6 @@ const load = async (filePath) => {
   return exports;
 };
 
-const delay = async (ms) => new Promise((res) => setTimeout(res, ms));
-
 const testHook = async ({ url, path, argsString }) => {
   return new Promise((resolve, reject) => {
     http.get(url + path + '?' + argsString, { method: 'POST' }, (res) => {
@@ -51,8 +49,7 @@ const testHook = async ({ url, path, argsString }) => {
   });
 };
 
-const apiReady = async ({ url, timeout }) => {
-  await delay(timeout);
+const apiReady = async (url) => {
   await new Promise((resolve) => {
     const checker = setInterval(async () => {
       testHook({
