@@ -21,6 +21,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Start db docker containers
+        run: |
+          docker-compose -f test-db-docker-compose.yml up  -d
+          sleep 10  # wait for database to be ready
+
       - name: Use Node.js ${{ matrix.node }}
         uses: actions/setup-node@v3
         with:
@@ -37,12 +42,14 @@ jobs:
 
       - run: npm test
 
-      - name: Prepear docker containers for integration tests
-        run: |
-          docker-compose -f test-docker-compose.yml up  -d
-          sleep 10  # wait for database to be ready
+      # - name: Prepearing api docker container for integration tests
+      #   run: |
+      #     docker-compose -f test-api-docker-compose.yml up  -d
+      #     sleep 2  # wait for api to be ready
 
       - name: Client test
         run: |
+          node server.js > /dev/null&
+          sleep 4  # wait for api to be ready
+          node test/system.js
           node --test test/client.js
-          node --test test/system.js
