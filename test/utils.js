@@ -1,19 +1,12 @@
 'use strict';
 
-const fs = require('node:fs').promises;
-const vm = require('node:vm');
 const http = require('node:http');
+const metavm = require('metavm');
 
-const RUN_OPTIONS = { timeout: 5000, displayErrors: false };
 const INTERVAL = 500;
 
-const load = async (filePath, sandbox) => {
-  // TODO Use metavm
-  const src = await fs.readFile(filePath, 'utf8');
-  const code = `'use strict';\n${src}`;
-  const script = new vm.Script(code);
-  const context = vm.createContext(Object.freeze({ ...sandbox }));
-  const exports = script.runInContext(context, RUN_OPTIONS);
+const load = async (filePath) => {
+  const { exports } = await metavm.readScript(filePath);
   return exports;
 };
 
@@ -79,8 +72,7 @@ const apiReady = async ({ url, timeout }) => {
 };
 
 const loadConfig = async (configName) => {
-  const sandbox = { Map: class PseudoMap {} };
-  return load(`./application/config/${configName}.js`, sandbox);
+  return load(`./application/config/${configName}.js`);
 };
 
 const getUrl = async () => {
