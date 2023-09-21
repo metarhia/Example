@@ -1,6 +1,7 @@
 'use strict';
 
 const { Metacom } = require('metacom/lib/client');
+const { once } = require('node:events');
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
@@ -106,9 +107,16 @@ const runTests = async (wsClient, wsToken, wsApi, url) => {
     'example/subscribe': async () => {
       const res = await wsApi.example.subscribe({ test: true });
       assert.deepEqual(res, { subscribed: 'resmon' });
-      await new Promise((resolve) => {
-        wsApi.example.once('resmon', resolve());
-      });
+      const [value] = await once(wsApi.example, 'resmon');
+      const keys = Object.keys(value);
+      const expectedKeys = [
+        'heapTotal',
+        'heapUsed',
+        'external',
+        'contexts',
+        'detached',
+      ];
+      assert.deepStrictEqual(keys, expectedKeys);
     },
 
     'example/wait': async () => {
