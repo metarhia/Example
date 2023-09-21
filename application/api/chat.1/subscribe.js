@@ -4,5 +4,4 @@ async ({ room }) => {
   context.client.on('close', () => {
     clients.delete(context.client);
   });
-  return 'ok';
 };

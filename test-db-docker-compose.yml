@@ -1,26 +1,6 @@
 version: '3'
 
 services:
-  api-example:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: api-example
-    environment:
-      - DB_HOST=pg-example
-      - REDIS_HOST=redis-example
-      - REDIS_PORT=6379
-    volumes:
-      - ./application:/usr/server/application
-    depends_on:
-      - pg-example
-      - redis-example
-    ports:
-      - 127.0.0.1:8000:8000
-      - 127.0.0.1:8001:8001
-      - 127.0.0.1:8002:8002
-    restart: always
-
   pg-example:
     image: postgres:14.1-alpine3.15
     container_name: pg-example
@@ -29,7 +9,6 @@ services:
       - POSTGRES_PASSWORD=marcus
       - POSTGRES_DB=application
     volumes:
-      - ./data/postgres/:/var/lib/postgresql/data
       - ./database/structure.sql:/docker-entrypoint-initdb.d/1.sql
       - ./database/data.sql:/docker-entrypoint-initdb.d/2.sql
     ports:
@@ -42,6 +21,7 @@ services:
     ports:
       - 127.0.0.1:6379:6379
     restart: always
+
 networks:
   default:
     name: api-example-network

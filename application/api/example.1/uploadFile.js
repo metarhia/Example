@@ -5,5 +5,5 @@ async ({ name, data }) => {
   if (filePath.startsWith(tmpPath)) {
     await node.fsp.writeFile(filePath, buffer);
   }
-  return { uploaded: data.length };
+  return { uploaded: data.data.length };
 };

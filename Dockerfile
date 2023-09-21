@@ -1,4 +1,4 @@
-FROM mhart/alpine-node:14
+FROM node:20-alpine
 WORKDIR /usr/server
 COPY . .
 RUN npm ci --only=production

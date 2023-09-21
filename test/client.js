@@ -1,236 +1,190 @@
 'use strict';
 
-const runTests = (wsClient, wsToken, httpClient, httpToken) => {
-  const metatests = require('metatests');
-  const fs = require('fs');
-  const fsp = fs.promises;
-  const { Blob, Buffer } = require('node:buffer');
-  const stream = require('stream');
+const { Metacom } = require('metacom/lib/client');
+const { once } = require('node:events');
 
+const test = require('node:test');
+const assert = require('node:assert/strict');
 
+const { Blob } = require('node:buffer');
+const fs = require('node:fs');
+const fsp = fs.promises;
+const { testHook, apiReady, getUrl } = require('./utils.js');
 
-  metatests.testAsync('system/introspect', async (test) => {
-    const introspect = await wsClient.scaffold('system')('introspect')([
-      'auth',
-      'console',
-      'example',
-      'files',
-      'test',
-    ]);
-    test.strictSame(introspect?.auth?.restore?.[0], 'token');
-    test.end();
-  });
+const LOGIN = 'marcus';
+const PASSWORD = 'marcus';
+const ACCOUNT_ID = '2';
+const TEST_TIMEOUT = 10000;
 
-  metatests.testAsync('example/add', async (test) => {
-    const add = await wsClient.scaffold('example')('add')({ a: 1, b: 2 });
-    test.strictSame(add, 3);
-    test.end();
-  });
+const runTests = async (wsClient, wsToken, wsApi, url) => {
+  const tests = {
+    'system/introspect': async () => {
+      const units = ['auth', 'console', 'example', 'files', 'test'];
+      const introspect = await wsClient.scaffold('system')('introspect')(units);
+      assert.strictEqual(introspect?.auth?.restore?.[0], 'token');
+    },
 
-  metatests.testAsync('example/citiesByCountry', async (test) => {
-    const cities = await wsClient.scaffold('example')('citiesByCountry')({
-      countryId: 1,
-    });
-    test.strictEqual(cities?.result, 'success');
-    test.strictEqual(Array.isArray(cities?.data), true);
-    test.end();
-  });
+    'example/add': async () => {
+      const add = await wsApi.example.add({ a: 1, b: 2 });
+      assert.strictEqual(add, 3);
+    },
 
-  metatests.testAsync('example/customError', async (test) => {
-    try {
-      await wsClient.scaffold('example')('customError')();
-    } catch (customError) {
-      test.errorCompare(customError, new Error('Return custom error', 12345));
-      test.strictEqual(customError?.code, 12345);
-    } finally {
-      test.end();
-    }
-  });
+    'example/citiesByCountry': async () => {
+      const cities = await wsApi.example.citiesByCountry({
+        countryId: 1,
+      });
+      assert.strictEqual(cities?.result, 'success');
+      assert.strictEqual(Array.isArray(cities?.data), true);
+    },
 
-  metatests.testAsync('example/customException', async (test) => {
-    try {
-      await wsClient.scaffold('example')('customException')();
-    } catch (customError) {
-      test.errorCompare(customError, new Error('Custom ecxeption', 12345));
-      test.strictEqual(customError?.code, 12345);
-    } finally {
-      test.end();
-    }
-  });
+    'example/customError': async () => {
+      try {
+        await wsApi.example.customError();
+      } catch (customError) {
+        assert.strictEqual(customError.message, 'Return custom error');
+        assert.strictEqual(customError?.code, 12345);
+      }
+    },
 
-  metatests.testAsync('example/error', async (test) => {
-    try {
-      await wsClient.scaffold('example')('error')();
-    } catch (Error) {
-      test.errorCompare(Error, new Error('Return error'));
-    } finally {
-      test.end();
-    }
-  });
+    'example/customException': async () => {
+      try {
+        await wsApi.example.customException();
+      } catch (customError) {
+        assert.strictEqual(customError.message, 'Custom ecxeption');
+        assert.strictEqual(customError?.code, 12345);
+      }
+    },
 
-  metatests.testAsync('example/exception', async (test) => {
+    'example/error': async () => {
+      try {
+        await wsApi.example.error();
+      } catch (err) {
+        assert.strictEqual(err.message, 'Return error');
+      }
+    },
 
-    try {
-      await wsClient.scaffold('example')('exception')();
-    }
-    catch(Error){
-      test.errorCompare(Error, new Error('Example exception'));
-    }
-    finally {
-      test.end();
-    }
-      // test.fail('Shoud never reach here');
-      // test.end();
-  });
+    'example/exception': async () => {
+      try {
+        await wsApi.example.exception();
+      } catch (err) {
+        assert.strictEqual(err.message, 'Internal Server Error');
+      }
+    },
 
-  metatests.testAsync('example/getClientInfo', async (test) => {
+    'example/getClientInfo': async () => {
+      const info = await wsApi.example.getClientInfo();
+      assert.strictEqual(info?.result?.token, wsToken);
+      assert.strictEqual(info?.result?.accountId, ACCOUNT_ID);
+    },
 
-      const info = await wsClient.scaffold('example')('getClientInfo')();
-
-      // console.log('info', info)
-      test.strictEqual(info?.result?.ip, '127.0.0.1');
-      test.strictEqual(info?.result?.token, wsToken);
-      test.strictEqual(info?.result?.accountId, '2');
-      test.end();
-
-  });
-
-  metatests.testAsync('example/redisSet + redisGet', async (test) => {
-    try {
-      const setting = await wsClient.scaffold('example')('redisSet')({
+    'example/redisSet + redisGet': async () => {
+      const setting = await wsApi.example.redisSet({
         key: 'MetarhiaExampleTest',
         value: 1,
       });
-      const getting = await wsClient.scaffold('example')('redisGet')({
+      const getting = await wsApi.example.redisGet({
         key: 'MetarhiaExampleTest',
       });
-      // console.log({setting, getting});
-      test.strictEqual(getting, '1');
-    } catch (Error) {
-      test.errorCompare(Error, new Error('Example exception'));
-    } finally {
-      test.end();
-    }
-  });
+      assert.strictEqual(setting?.result, 'OK');
+      assert.strictEqual(getting?.result, '1');
+    },
 
-  // metatests.testAsync('example/resources', async (test) => {
-  //   try {
-  //     const resources = await wsClient.scaffold('example')('resources')();
-  //     test.strictEqual(resources?.total, null);
-  //     // console.log({resources});
-  //   } catch (Error) {
-  //     console.log(Error);
-  //   } finally {
-  //     test.end();
-  //   }
-  // });
+    'example/resources': async () => {
+      const resources = await wsApi.example.resources();
+      assert.strictEqual(resources?.total, null);
+    },
 
-  //   metatests.testAsync('example/hook', async (test) => {
-  //     let hook;
-  //     try {
-  //        hook = await client.httpCall('example', 1)('hook')();
+    hook: async () => {
+      const hook = await testHook({
+        url,
+        path: '/api/hook',
+        argsString: 'arg1=2&mem=3',
+      });
 
-  //       console.log(hook)
-  //       test.strictEqual(hook?.success, true);
-  //     }
-  //     catch(e){
-  //       console.log(e)
-  //     }
-  //     finally {
-  //     test.end(hook);
-  //     }
+      assert.strictEqual(hook?.success, true);
+    },
 
-  // });
+    'example/subscribe': async () => {
+      const res = await wsApi.example.subscribe({ test: true });
+      assert.deepEqual(res, { subscribed: 'resmon' });
+      const [value] = await once(wsApi.example, 'resmon');
+      const keys = Object.keys(value);
+      const expectedKeys = [
+        'heapTotal',
+        'heapUsed',
+        'external',
+        'contexts',
+        'detached',
+      ];
+      assert.deepStrictEqual(keys, expectedKeys);
+      const ret = await wsApi.example.unsubscribe();
+      assert.deepEqual(ret, { unsubscribed: 'resmon' });
+    },
 
+    'example/wait': async () => {
+      const wait = await wsApi.example.wait({ delay: 1000 });
+      assert.strictEqual(wait, 'done');
+    },
 
-
-  // metatests.testAsync('example/subscribe', async (test) => {
-  //   try {
-  //     const wait = await wsClient.scaffold('example')('wait')({ delay: 1000 });
-  //     // console.log(client.api.chat)
-  //     test.strictEqual(wait, 'done');
-  //   } catch (Error) {
-  //     console.log(Error);
-  //   } finally {
-  //     test.end();
-  //   }
-  // });
-/*
-   metatests.testAsync('example/uploadFile', async (test) => {
-      const original = 'uploading/sunset.jpg', uploaded = '../application/tmp/sunset_uploaded.jpg';
-      // const buffer = Buffer.from(fs.readFileSync(original));
-      // const blob = Uint8Array.from(buffer).buffer;
-      const content = await fsp.readFile(original);
+    'file/upload': async () => {
+      const file = 'sunset.jpg';
+      const path = './test/uploading/' + file;
+      const content = await fsp.readFile(path);
       const blob = new Blob([content]);
-      // blob.name = 'sunset.jpg';
-      // console.log(blob.size)
+      blob.name = file;
+      // createBlobUploader creates streamId and inits file reader for convenience
+      const uploader = wsClient.createBlobUploader(blob);
+      // Prepare backend file consumer
+      const res = await wsApi.files.upload({
+        streamId: uploader.id,
+        name: file,
+      });
+      assert.strictEqual(res?.result, 'Stream initialized');
+      // Start uploading stream and wait for its end
+      await uploader.upload();
+    },
 
-      // console.log(buffer)
-    const uploader = client.createBlobUploader(blob);
-    uploader.upload();
+    'example/uploadFile': async () => {
+      const file = 'sunset.jpg';
+      const path = './test/uploading/' + file;
+      const content = await fsp.readFile(path);
 
-      // const readable = fs.createReadStream(original);
-      // const writable = client.createStream(original);
-      // readable.pipe(writable);
-      // // once readable is piped
-      // await wsClient.scaffold('example')('uploadFile')('sunset_uploaded.jpg', {stremId: writable.streamId});
+      const res = await wsApi.example.uploadFile({
+        data: content.toJSON(),
+        name: file,
+      });
+      assert.strictEqual(res?.uploaded, content?.length);
+    },
+  };
 
-      // const fixture = fs.readFileSync(original);
-      // const result = fs.readFileSync(uploaded);
-      // test.strictSame(result, fixture);
-      test.end();
-    });
-*/
+  const prom = [];
+  console.log(`Run ${Object.entries(tests).length} tests`);
+  for (const [caption, func] of Object.entries(tests)) {
+    prom.push(test.test(caption, func));
+  }
 
-  // metatests.testAsync('example/wait', async (test) => {
-  //   try {
-  //     const wait = await wsClient.scaffold('example')('wait')({ delay: 1000 });
-  //     test.strictEqual(wait, 'done');
-  //   } catch (Error) {
-  //     console.log(Error);
-  //   } finally {
-  //     test.end();
-  //   }
-  // });
-
+  await Promise.allSettled(prom);
 };
 
-const connect = async () => {
-  const { Metacom } = require('metacom/lib/client');
+const main = async () => {
+  const { url, wsUrl } = await getUrl();
 
-  const wsUrl = 'ws://127.0.0.1:8000/api';
-  const wsClient = Metacom.create(wsUrl);
-  await wsClient.open();
-  const wsSignin = await wsClient.scaffold('auth')('signin')({
-    login: 'marcus',
-    password: 'marcus',
-  });
+  await apiReady(url);
 
-  const wsToken = wsSignin?.token;
-  // const wsClient = null, wsToken = null;
+  const wsClient = Metacom.create(wsUrl + '/api');
+  const wsApi = wsClient.api;
+  await wsClient.load('auth', 'console', 'example', 'files');
+  const res = await wsApi.auth.signin({ login: LOGIN, password: PASSWORD });
+  const wsToken = res.token;
 
-  const httpUrl = 'http://127.0.0.1:8000/api';
-  const httpClient = Metacom.create(httpUrl);
-  await httpClient.open();
-  const httpSignin = await httpClient.scaffold('auth')('signin')({
-    login: 'marcus',
-    password: 'marcus',
-  });
-  const httpToken = httpSignin?.token;
-  //  const httpClient = null, httpToken = null;
-
-
-  // await client.load( 'auth',
-  // 'console',
-  // 'example',
-  // 'files',
-  // 'test');
-
-
-
-  runTests(wsClient, wsToken, httpClient, httpToken);
-
+  wsClient.on('close', process.exit);
+  setTimeout(() => {
+    console.info('Stop tests by timeout');
+    wsClient.close();
+    process.exit(-1);
+  }, TEST_TIMEOUT);
+  await runTests(wsClient, wsToken, wsApi, url);
+  wsClient.close();
 };
 
-connect();
-// console.log(JSON.stringify({ a: 1, b: 2 }));
+main();

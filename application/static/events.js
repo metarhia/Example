@@ -1,12 +1,4 @@
-const warnAboutMemoryLeak = (eventName, count) =>
-  console.warn(
-    `Possible EventEmitter memory leak detected.
-  ${count} listeners added.
-  You have to decrease the number of listeners for '${eventName}' event.
-  Hint: avoid adding listeners in loops.`,
-  );
-
-export default class EventEmitter {
+class EventEmitter {
   constructor() {
     this.events = new Map();
     this.maxListenersCount = 10;
@@ -27,7 +19,13 @@ export default class EventEmitter {
     if (event) {
       event.add(fn);
       const tooManyListeners = event.size > this.maxListenersCount;
-      if (tooManyListeners) warnAboutMemoryLeak(name, event.size);
+      if (tooManyListeners) {
+        const name = 'MaxListenersExceededWarning';
+        const warn = 'Possible EventEmitter memory leak detected';
+        const max = `Current maxListenersCount is ${this.maxListenersCount}`;
+        const hint = 'Hint: avoid adding listeners in loops';
+        console.warn(`${name}: ${warn}. ${max}. ${hint}`);
+      }
     } else {
       this.events.set(name, new Set([fn]));
     }
@@ -52,13 +50,17 @@ export default class EventEmitter {
   remove(name, fn) {
     const event = this.events.get(name);
     if (!event) return;
-    if (event.has(fn)) {
-      event.delete(fn);
-    }
+    if (event.has(fn)) event.delete(fn);
   }
 
   clear(name) {
-    if (name) this.events.delete(name);
-    else this.events.clear();
+    if (!name) return void this.events.clear();
+    this.events.delete(name);
+  }
+
+  static once(emitter, name) {
+    return new Promise((resolve) => emitter.once(name, resolve));
   }
 }
+
+export default EventEmitter;

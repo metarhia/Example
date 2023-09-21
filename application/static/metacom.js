@@ -1,5 +1,5 @@
 import EventEmitter from './events.js';
-import { Chunk, MetaReadable, MetaWritable } from './streams.js';
+import { chunkDecode, MetaReadable, MetaWritable } from './streams.js';
 
 const CALL_TIMEOUT = 7 * 1000;
 const PING_INTERVAL = 60 * 1000;
@@ -20,9 +20,14 @@ class MetacomError extends Error {
   }
 }
 
-class MetacomInterface extends EventEmitter {}
+class MetacomUnit extends EventEmitter {
+  emit(...args) {
+    super.emit('*', ...args);
+    super.emit(...args);
+  }
+}
 
-export class Metacom extends EventEmitter {
+class Metacom extends EventEmitter {
   constructor(url, options = {}) {
     super();
     this.url = url;
@@ -32,14 +37,14 @@ export class Metacom extends EventEmitter {
     this.calls = new Map();
     this.streams = new Map();
     this.streamId = 0;
-    this.eventId = 0;
     this.active = false;
     this.connected = false;
     this.opening = null;
-    this.lastActivity = new Date().getTime();
+    this.lastActivity = Date.now();
     this.callTimeout = options.callTimeout || CALL_TIMEOUT;
     this.pingInterval = options.pingInterval || PING_INTERVAL;
     this.reconnectTimeout = options.reconnectTimeout || RECONNECT_TIMEOUT;
+    this.ping = null;
     this.open();
   }
 
@@ -49,15 +54,15 @@ export class Metacom extends EventEmitter {
     return new Transport(url, options);
   }
 
-  getStream(streamId) {
-    const stream = this.streams.get(streamId);
+  getStream(id) {
+    const stream = this.streams.get(id);
     if (stream) return stream;
-    throw new Error(`Stream ${streamId} is not initialized`);
+    throw new Error(`Stream ${id} is not initialized`);
   }
 
   createStream(name, size) {
-    const streamId = ++this.streamId;
-    const initData = { streamId, name, size };
+    const id = ++this.streamId;
+    const initData = { type: 'stream', id, name, size };
     const transport = this;
     return new MetaWritable(transport, initData);
   }
@@ -67,7 +72,7 @@ export class Metacom extends EventEmitter {
     const size = blob.size;
     const consumer = this.createStream(name, size);
     return {
-      streamId: consumer.streamId,
+      id: consumer.id,
       upload: async () => {
         const reader = blob.stream().getReader();
         let chunk;
@@ -81,53 +86,55 @@ export class Metacom extends EventEmitter {
 
   async message(data) {
     if (data === '{}') return;
-    this.lastActivity = new Date().getTime();
+    this.lastActivity = Date.now();
     let packet;
     try {
       packet = JSON.parse(data);
     } catch {
       return;
     }
-    const [callType, target] = Object.keys(packet);
-    const callId = packet[callType];
-    const args = packet[target];
-    if (callId) {
-      if (callType === 'callback') {
-        const promised = this.calls.get(callId);
-        if (!promised) return;
-        const [resolve, reject] = promised;
-        this.calls.delete(callId);
-        if (packet.error) {
-          reject(new MetacomError(packet.error));
-          return;
-        }
-        resolve(args);
-      } else if (callType === 'event') {
-        const [interfaceName, eventName] = target.split('/');
-        const metacomInterface = this.api[interfaceName];
-        metacomInterface.emit(eventName, args);
-      } else if (callType === 'stream') {
-        const { stream: streamId, name, size, status } = packet;
-        const stream = this.streams.get(streamId);
-        if (name && typeof name === 'string' && Number.isSafeInteger(size)) {
-          if (stream) {
-            console.error(new Error(`Stream ${name} is already initialized`));
-          } else {
-            const streamData = { streamId, name, size };
-            const stream = new MetaReadable(streamData);
-            this.streams.set(streamId, stream);
-          }
-        } else if (!stream) {
-          console.error(new Error(`Stream ${streamId} is not initialized`));
-        } else if (status === 'end') {
-          await stream.close();
-          this.streams.delete(streamId);
-        } else if (status === 'terminate') {
-          await stream.terminate();
-          this.streams.delete(streamId);
+    const { type, id, name } = packet;
+    if (type === 'event') {
+      const [unit, eventName] = name.split('/');
+      const metacomUnit = this.api[unit];
+      if (metacomUnit) metacomUnit.emit(eventName, packet.data);
+      return;
+    }
+    if (!id) {
+      console.error(new Error('Packet structure error'));
+      return;
+    }
+    if (type === 'callback') {
+      const promised = this.calls.get(id);
+      if (!promised) return;
+      const [resolve, reject, timeout] = promised;
+      this.calls.delete(id);
+      clearTimeout(timeout);
+      if (packet.error) {
+        return void reject(new MetacomError(packet.error));
+      }
+      resolve(packet.result);
+    } else if (type === 'stream') {
+      const { name, size, status } = packet;
+      const stream = this.streams.get(id);
+      if (name && typeof name === 'string' && Number.isSafeInteger(size)) {
+        if (stream) {
+          console.error(new Error(`Stream ${name} is already initialized`));
         } else {
-          console.error(new Error('Stream packet structure error'));
+          const streamData = { id, name, size };
+          const stream = new MetaReadable(streamData);
+          this.streams.set(id, stream);
         }
+      } else if (!stream) {
+        console.error(new Error(`Stream ${id} is not initialized`));
+      } else if (status === 'end') {
+        await stream.close();
+        this.streams.delete(id);
+      } else if (status === 'terminate') {
+        await stream.terminate();
+        this.streams.delete(id);
+      } else {
+        console.error(new Error('Stream packet structure error'));
       }
     }
   }
@@ -135,51 +142,46 @@ export class Metacom extends EventEmitter {
   async binary(blob) {
     const buffer = await blob.arrayBuffer();
     const byteView = new Uint8Array(buffer);
-    const { streamId, payload } = Chunk.decode(byteView);
-    const stream = this.streams.get(streamId);
+    const { id, payload } = chunkDecode(byteView);
+    const stream = this.streams.get(id);
     if (stream) await stream.push(payload);
-    else console.warn(`Stream ${streamId} is not initialized`);
+    else console.warn(`Stream ${id} is not initialized`);
   }
 
-  async load(...interfaces) {
+  async load(...units) {
     const introspect = this.scaffold('system')('introspect');
-    const introspection = await introspect(interfaces);
+    const introspection = await introspect(units);
     const available = Object.keys(introspection);
-    for (const interfaceName of interfaces) {
-      if (!available.includes(interfaceName)) continue;
-      const methods = new MetacomInterface();
-      const iface = introspection[interfaceName];
-      const request = this.scaffold(interfaceName);
-      const methodNames = Object.keys(iface);
+    for (const unit of units) {
+      if (!available.includes(unit)) continue;
+      const methods = new MetacomUnit();
+      const instance = introspection[unit];
+      const request = this.scaffold(unit);
+      const methodNames = Object.keys(instance);
       for (const methodName of methodNames) {
         methods[methodName] = request(methodName);
       }
-      methods.on('*', (eventName, data) => {
-        const target = `${interfaceName}/${eventName}`;
-        const packet = { event: ++this.eventId, [target]: data };
-        this.send(JSON.stringify(packet));
-      });
-      this.api[interfaceName] = methods;
+      this.api[unit] = methods;
     }
   }
 
-  scaffold(iname, ver) {
-    return (methodName) =>
+  scaffold(unit, ver) {
+    return (method) =>
       async (args = {}) => {
-        const callId = ++this.callId;
-        const interfaceName = ver ? `${iname}.${ver}` : iname;
-        const target = interfaceName + '/' + methodName;
+        const id = ++this.callId;
+        const unitName = unit + (ver ? '.' + ver : '');
+        const target = unitName + '/' + method;
         if (this.opening) await this.opening;
         if (!this.connected) await this.open();
         return new Promise((resolve, reject) => {
-          setTimeout(() => {
-            if (this.calls.has(callId)) {
-              this.calls.delete(callId);
+          const timeout = setTimeout(() => {
+            if (this.calls.has(id)) {
+              this.calls.delete(id);
               reject(new Error('Request timeout'));
             }
           }, this.callTimeout);
-          this.calls.set(callId, [resolve, reject]);
-          const packet = { call: callId, [target]: args };
+          this.calls.set(id, [resolve, reject, timeout]);
+          const packet = { type: 'call', id, method: target, args };
           this.send(JSON.stringify(packet));
         });
       };
@@ -214,9 +216,9 @@ class WebsocketTransport extends Metacom {
       socket.close();
     });
 
-    setInterval(() => {
+    this.ping = setInterval(() => {
       if (this.active) {
-        const interval = new Date().getTime() - this.lastActivity;
+        const interval = Date.now() - this.lastActivity;
         if (interval > this.pingInterval) this.send('{}');
       }
     }, this.pingInterval);
@@ -235,6 +237,7 @@ class WebsocketTransport extends Metacom {
   close() {
     this.active = false;
     connections.delete(this);
+    clearInterval(this.ping);
     if (!this.socket) return;
     this.socket.close();
     this.socket = null;
@@ -242,7 +245,7 @@ class WebsocketTransport extends Metacom {
 
   send(data) {
     if (!this.connected) return;
-    this.lastActivity = new Date().getTime();
+    this.lastActivity = Date.now();
     this.socket.send(data);
   }
 }
@@ -260,7 +263,7 @@ class HttpTransport extends Metacom {
   }
 
   send(data) {
-    this.lastActivity = new Date().getTime();
+    this.lastActivity = Date.now();
     fetch(this.url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -277,3 +280,5 @@ Metacom.transport = {
   ws: WebsocketTransport,
   http: HttpTransport,
 };
+
+export { Metacom, MetacomUnit };

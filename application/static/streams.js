@@ -1,34 +1,21 @@
-import EventEmitter from './events.js';
+import EventEmitter from '/events.js';
 
-const STREAM_ID_LENGTH = 4;
+const ID_LENGTH = 4;
 
-const createStreamIdBuffer = (num) => {
-  const buffer = new ArrayBuffer(STREAM_ID_LENGTH);
-  const view = new DataView(buffer);
-  view.setInt32(0, num);
-  return buffer;
+const chunkEncode = (id, payload) => {
+  const chunk = new Uint8Array(ID_LENGTH + payload.length);
+  const view = new DataView(chunk.buffer);
+  view.setInt32(0, id);
+  chunk.set(payload, ID_LENGTH);
+  return chunk;
 };
 
-const getStreamId = (buffer) => {
-  const view = new DataView(buffer);
-  return view.getInt32(0);
+const chunkDecode = (chunk) => {
+  const view = new DataView(chunk.buffer);
+  const id = view.getInt32(0);
+  const payload = chunk.subarray(ID_LENGTH);
+  return { id, payload };
 };
-
-class Chunk {
-  static encode(streamId, payload) {
-    const streamIdView = new Uint8Array(createStreamIdBuffer(streamId));
-    const chunkView = new Uint8Array(STREAM_ID_LENGTH + payload.length);
-    chunkView.set(streamIdView);
-    chunkView.set(payload, STREAM_ID_LENGTH);
-    return chunkView;
-  }
-
-  static decode(chunkView) {
-    const streamId = getStreamId(chunkView.buffer);
-    const payload = chunkView.subarray(STREAM_ID_LENGTH);
-    return { streamId, payload };
-  }
-}
 
 const PUSH_EVENT = Symbol();
 const PULL_EVENT = Symbol();
@@ -36,15 +23,15 @@ const DEFAULT_HIGH_WATER_MARK = 32;
 const MAX_HIGH_WATER_MARK = 1000;
 
 class MetaReadable extends EventEmitter {
-  constructor(initData, options = {}) {
+  constructor(id, name, size, options = {}) {
     super();
-    this.streamId = initData.streamId;
-    this.name = initData.name;
-    this.size = initData.size;
+    this.id = id;
+    this.name = name;
+    this.size = size;
     this.highWaterMark = options.highWaterMark || DEFAULT_HIGH_WATER_MARK;
     this.queue = [];
     this.streaming = true;
-    this.status = null;
+    this.status = 'active';
     this.bytesRead = 0;
     this.maxListenersCount = this.getMaxListeners() - 1;
   }
@@ -61,8 +48,9 @@ class MetaReadable extends EventEmitter {
   }
 
   async finalize(writable) {
-    const waitWritableEvent = this.waitEvent.bind(writable);
-    writable.once('error', () => this.terminate());
+    const waitWritableEvent = EventEmitter.once.bind(this, writable);
+    const onError = () => this.terminate();
+    writable.once('error', onError);
     for await (const chunk of this) {
       const needDrain = !writable.write(chunk);
       if (needDrain) await waitWritableEvent('drain');
@@ -71,11 +59,11 @@ class MetaReadable extends EventEmitter {
     writable.end();
     await waitWritableEvent('close');
     await this.close();
+    writable.removeListener('error', onError);
   }
 
-  // implements nodejs readable pipe method
   pipe(writable) {
-    void this.finalize(writable);
+    this.finalize(writable);
     return writable;
   }
 
@@ -137,48 +125,43 @@ class MetaReadable extends EventEmitter {
   async *[Symbol.asyncIterator]() {
     while (this.streaming) {
       const chunk = await this.read();
-      if (chunk) yield chunk;
-      else return;
+      if (!chunk) return;
+      yield chunk;
     }
   }
 }
 
 class MetaWritable extends EventEmitter {
-  constructor(transport, initData) {
+  constructor(transport, options = {}) {
     super();
     this.transport = transport;
-    this.streamId = initData.streamId;
-    this.name = initData.name;
-    this.size = initData.size;
+    this.id = options.id;
+    this.name = options.name;
+    this.size = options.size;
     this.init();
   }
 
   init() {
-    const packet = {
-      stream: this.streamId,
-      name: this.name,
-      size: this.size,
-    };
+    const { id, name, size } = this;
+    const packet = { type: 'stream', id, name, size };
     this.transport.send(JSON.stringify(packet));
   }
 
-  // implements nodejs writable write method
   write(data) {
-    const chunk = Chunk.encode(this.streamId, data);
+    const chunk = chunkEncode(this.id, data);
     this.transport.send(chunk);
     return true;
   }
 
-  // implements nodejs writable end method
   end() {
-    const packet = { stream: this.streamId, status: 'end' };
+    const packet = { type: 'stream', id: this.id, status: 'end' };
     this.transport.send(JSON.stringify(packet));
   }
 
   terminate() {
-    const packet = { stream: this.streamId, status: 'terminate' };
+    const packet = { type: 'stream', id: this.id, status: 'terminate' };
     this.transport.send(JSON.stringify(packet));
   }
 }
 
-export { Chunk, MetaReadable, MetaWritable };
+export { chunkEncode, chunkDecode, MetaReadable, MetaWritable };

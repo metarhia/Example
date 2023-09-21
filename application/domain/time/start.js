@@ -1,11 +1,17 @@
 async () => {
-  if (application.worker.id === 'W1') {
-    setTimeout(async () => {
-      const time = await bus.worldTime.currentTime({
+  if (!config.examples.bus) return;
+  if (application.worker.id !== 'W1') return;
+  setTimeout(() => {
+    bus.worldTime
+      .currentTime({
         area: 'Europe',
         location: 'Kiev',
+      })
+      .then((time) => {
+        console.log(`${time.timezone} - ${time.datetime}`);
+      })
+      .catch(() => {
+        console.log('Can not access time server');
       });
-      console.log(`${time.timezone} - ${time.datetime}`);
-    }, 1000);
-  }
+  }, 1000);
 };

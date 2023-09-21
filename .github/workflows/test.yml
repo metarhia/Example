@@ -1,6 +1,8 @@
 name: Testing CI
 
-on: pull_request
+on:
+  - pull_request
+  - push # not for landing
 
 jobs:
   build:
@@ -9,24 +11,40 @@ jobs:
     strategy:
       matrix:
         node:
-          - 14
           - 16
           - 18
           - 19
+          - 20
         os:
           - ubuntu-latest
 
     steps:
       - uses: actions/checkout@v3
+
+      - name: Start db docker containers
+        run: |
+          docker-compose -f test-db-docker-compose.yml up  -d
+          sleep 10  # wait for database to be ready
+
       - name: Use Node.js ${{ matrix.node }}
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
+
       - uses: actions/cache@v3
         with:
           path: ~/.npm
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
+
       - run: npm ci
+
       - run: npm test
+
+      - name: Client test
+        run: |
+          node server.js > /dev/null&
+          sleep 4  # wait for api to be ready
+          node test/system.js
+          node --test test/client.js
