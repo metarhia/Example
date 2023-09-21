@@ -117,6 +117,8 @@ const runTests = async (wsClient, wsToken, wsApi, url) => {
         'detached',
       ];
       assert.deepStrictEqual(keys, expectedKeys);
+      const ret = await wsApi.example.unsubscribe();
+      assert.deepEqual(ret, { unsubscribed: 'resmon' });
     },
 
     'example/wait': async () => {
