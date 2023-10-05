@@ -4,7 +4,7 @@
 
   async run(t) {
     const tasks = [
-      { url: '/', status: 200, size: 2099 },
+      { url: '/', size: 2099 },
       { url: '/console.js', size: 14366 },
       { url: '/unknown', status: 404, size: 113 },
       { url: '/unknown.png', status: 404, size: 113 },
