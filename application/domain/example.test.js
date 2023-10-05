@@ -15,19 +15,19 @@
       { url: '/article/name', size: 141 },
     ];
 
-    await t.test('Get static resources', async () => {
-      for (const task of tasks) {
-        const url = `http://127.0.0.1:8000${task.url}`;
+    for (const task of tasks) {
+      const url = `http://127.0.0.1:8000${task.url}`;
+      await t.test(`Get static resource: ${url}`, async () => {
         const response = await fetch(url);
         const { status = 200, size } = task;
-        const msg = `${url} status: ${response.status} expected: ${status}`;
+        const msg = `status: ${response.status} expected: ${status}`;
         node.assert.strictEqual(response.status, status, msg);
         if (size) {
           const data = await response.blob();
-          const msg = `${url} size: ${data.size} expected: ${size}`;
+          const msg = `size: ${data.size} expected: ${size}`;
           node.assert.strictEqual(data.size, size, msg);
         }
-      }
-    });
+      });
+    }
   },
 });
