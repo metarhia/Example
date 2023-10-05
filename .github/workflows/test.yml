@@ -13,6 +13,8 @@ jobs:
           - 20
         os:
           - ubuntu-latest
+          - windows-latest
+          - macos-latest
 
     steps:
       - uses: actions/checkout@v3
@@ -27,4 +29,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
       - run: npm ci
-      - run: npm test
+      - run: npm run dotest
+        env:
+          MODE: test
