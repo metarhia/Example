@@ -3,8 +3,6 @@
   options: {},
 
   async run(t) {
-    console.log(t);
-
     await t.test('Get room with domain.chat.getRoom', async () => {
       const name = 'example1';
       const room = await domain.chat.getRoom(name);

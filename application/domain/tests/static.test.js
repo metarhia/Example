@@ -1,6 +1,5 @@
 ({
   name: 'Static server test',
-  options: {},
 
   async run(t) {
     const tasks = [
