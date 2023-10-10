@@ -10,7 +10,7 @@
     });
 
     await t.test('Send message with domain.chat.send', async () => {
-      const result = domain.chat.send('Marcus', 'Hello there');
+      const result = domain.chat.send('example1', 'Hello there');
       node.assert.strictEqual(result, undefined);
     });
   },
