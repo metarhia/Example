@@ -9,8 +9,13 @@
     return room;
   },
 
+  dropRoom(name) {
+    domain.chat.rooms.delete(name);
+  },
+
   send(name, message) {
-    const room = domain.chat.getRoom(name);
+    const room = domain.chat.rooms.get(name);
+    if (!room) throw new Error(`Room ${name} is not found`);
     for (const client of room) {
       client.emit('chat/message', { room: name, message });
     }
