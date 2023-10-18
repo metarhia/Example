@@ -1,3 +1,4 @@
 async () => {
-  console.debug('Stop example plugin');
+  if (!config.examples.cache) return;
+  console.debug('Stop example');
 };

@@ -3,5 +3,5 @@
   scheduler: false,
   metacom: false,
   invoke: false,
-  plugin: false,
+  cache: false,
 });
