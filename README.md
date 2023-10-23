@@ -47,7 +47,7 @@ let's start with
 - API parallel execution concurrency
 - API method execution timeout
 - Load balancing for scaling
-- Prototype polution prevention
+- Prototype pollution prevention
 - Better code isolation
 
 ## Usage
