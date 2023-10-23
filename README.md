@@ -60,10 +60,10 @@ let's start with
 - Start your project modifying this starter kit
 - If you have Docker and Docker Compose installed to run the project, use the command: `docker-compose up`
 - Before running server initialize the DB:
-  - First of all, make sure you have PostgreSQL installed (prefer 12.x to 16.x).
+  - First of all, make sure you have PostgreSQL installed (preferably 12.x to 16.x).
   - Run database initialization script: `database/setup.sh`
 - Run project: `node server.js` and stop with Ctrl+C
-- Ask questions in telegram https://t.me/nodeua (node.js related) or
+- Ask questions in Telegram https://t.me/nodeua (node.js related) or
   https://t.me/metaserverless (metarhia related)
 
 ## License
