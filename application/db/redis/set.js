@@ -1,1 +1,1 @@
-(key, value) => db.redis.client.set(key, value);
+(key, value, options) => db.redis.client.set(key, value, options);
