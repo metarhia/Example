@@ -1,6 +1,6 @@
 ({
   async cases(t, metacom) {
-    if (t) return;
+    if (!t) return;
     const res = await metacom.api.auth.signin({
       login: 'marcus',
       password: 'marcus',
