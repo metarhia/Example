@@ -22,7 +22,6 @@ jobs:
       - name: Install PostgreSQL and Redis (on MacOS)
         if: runner.os == 'macOS'
         run: |
-          # brew install postgresql
           brew install redis
           brew services start postgresql
           brew services start redis
@@ -30,7 +29,6 @@ jobs:
       - name: Check services status (on MacOS)
         if: runner.os == 'macOS'
         run: |
-          # until brew services list | grep -E 'postgresql[[:space:]]+started' && brew services list | grep -E 'redis[[:space:]]+started'; do sleep 5; done
           until pg_isready -h localhost -p 5432 && redis-cli ping; do sleep 5; done
 
       - name: Set up PostgreSQL (on MacOS)
@@ -79,8 +77,6 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           docker-compose -f test-docker-compose.yml up -d pg-example redis-example
-          # sleep 15  # wait for database to be ready
-          # docker ps
 
       - name: Wait for PostgreSQL to become healthy
         if: runner.os == 'Linux'
