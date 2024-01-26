@@ -8,10 +8,12 @@ services:
     container_name: api-example
     environment:
       - DB_HOST=pg-example
+      - REDIS_HOST=redis-example
     volumes:
       - ./application:/usr/server/application
     depends_on:
       - pg-example
+      - redis-example
     ports:
       - 127.0.0.1:8000:8000
       - 127.0.0.1:8001:8001
@@ -19,7 +21,7 @@ services:
     restart: always
 
   pg-example:
-    image: postgres:14.1-alpine3.15
+    image: postgres:16.1-alpine3.19
     container_name: pg-example
     environment:
       - POSTGRES_USER=marcus
@@ -31,6 +33,13 @@ services:
       - ./database/data.sql:/docker-entrypoint-initdb.d/2.sql
     ports:
       - 127.0.0.1:5432:5432
+    restart: always
+
+  redis-example:
+    image: redis:7-alpine
+    container_name: redis-example
+    ports:
+      - 127.0.0.1:6379:6379
     restart: always
 
 networks:
