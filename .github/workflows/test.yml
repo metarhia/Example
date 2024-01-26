@@ -19,43 +19,41 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Install PostgreSQL and Redis (on MacOS)
+      - name: Setup (on MacOS)
         if: runner.os == 'macOS'
         run: |
+          # install and up
           brew install redis
           brew services start postgresql
           brew services start redis
 
-      - name: Check services status (on MacOS)
-        if: runner.os == 'macOS'
-        run: |
+          # wait for ready
           until pg_isready -h localhost -p 5432 && redis-cli ping; do sleep 5; done
 
-      - name: Set up PostgreSQL (on MacOS)
-        if: runner.os == 'macOS'
-        run: |
+          # setup db
           createuser -s postgres
           cd database
           bash setup.sh
 
-      - name: Setup pg (on Windows)
+      - name: Setup (on Windows)
         if: runner.os == 'Windows'
         run: |
+          # postgres
           echo "unix_socket_directories = ''" >> "$PGDATA/postgresql.conf"
           echo "port = 5432" >> "$PGDATA/postgresql.conf"
           $PG_BIN = "C:\Program Files\PostgreSQL\14\bin"
           $env:PATH = "$PG_BIN;$env:PATH"
           Write-Host "PATH=$env:PATH"
 
+          # start and wait
           pg_ctl start
           Start-Sleep -Seconds 15
 
+          # setup db
           cd database
           bash setup.sh
 
-      - name: Setup redis (on Windows)
-        if: runner.os == 'Windows'
-        run: |
+          # redis
           $URL = "https://github.com/redis-windows/redis-windows/releases/download/7.0.14/Redis-7.0.14-Windows-x64-with-Service.tar.gz"
           $outputFolder = "C:\redis"
 
@@ -69,32 +67,23 @@ jobs:
           Move-Item -Path "$outputFolder\$($innerFolder.Name)\*" -Destination $outputFolder -Force
           Remove-Item -Path "$outputFolder\$($innerFolder.Name)" -Force
 
+          # start redis
           cd $outputFolder
           sc.exe create Redis binpath=C:\redis\RedisService.exe start= auto
           net start Redis
 
-      - name: Start docker containers
+      - name: Setup (on Linux)
         if: runner.os == 'Linux'
         run: |
           docker-compose -f test-docker-compose.yml up -d pg-example redis-example
-
-      - name: Wait for PostgreSQL to become healthy
-        if: runner.os == 'Linux'
-        run: |
           while [[ "$(docker inspect --format='{{.State.Health.Status}}' pg-example)" != "healthy" ]]; do
-              echo "Waiting for PostgreSQL container to become healthy..."
-              sleep 5
+            echo "Waiting for PostgreSQL container to become healthy..."
+            sleep 5
           done
-        timeout-minutes: 5
-
-      - name: Wait for Redis to become healthy
-        if: runner.os == 'Linux'
-        run: |
           while [[ "$(docker inspect --format='{{.State.Health.Status}}' redis-example)" != "healthy" ]]; do
               echo "Waiting for Redis container to become healthy..."
               sleep 5
           done
-        timeout-minutes: 5
 
       - name: Use Node.js ${{ matrix.node }}
         uses: actions/setup-node@v3
@@ -114,6 +103,6 @@ jobs:
         env:
           MODE: test
 
-      - name: Stop containers
+      - name: Stop containers for Linux
         if: runner.os == 'Linux'
         run: docker-compose down
