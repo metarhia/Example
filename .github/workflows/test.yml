@@ -43,11 +43,21 @@ jobs:
           echo "port = 5432" >> "$PGDATA/postgresql.conf"
           $PG_BIN = "C:\Program Files\PostgreSQL\14\bin"
           $env:PATH = "$PG_BIN;$env:PATH"
-          Write-Host "PATH=$env:PATH"
 
           # start and wait
           pg_ctl start
-          Start-Sleep -Seconds 15
+          $timeout = 120
+          $elapsedTime = 0
+          Write-Host "Waiting for PostgreSQL to start"
+          while ($elapsedTime -lt $timeout) {
+              $pgIsReadyResult = & $PG_BIN\pg_isready.exe -h localhost -p 5432 -t 1
+              if ($pgIsReadyResult -eq "localhost:5432 - accepting connections") {
+                  Write-Host "PostgreSQL is ready"
+                  break
+              }
+              Start-Sleep -Seconds 5
+              $elapsedTime += 5
+          }
 
           # setup db
           cd database
@@ -71,6 +81,25 @@ jobs:
           cd $outputFolder
           sc.exe create Redis binpath=C:\redis\RedisService.exe start= auto
           net start Redis
+
+          # wait for redis
+          Write-Host "Waiting for Redis to start"
+          while ($elapsedTime -lt $timeout) {
+              $redisPingResult = & C:\redis\redis-cli.exe ping
+              if ($redisPingResult -eq "PONG") {
+                  Write-Host "Redis is ready"
+                  break
+              }
+              Start-Sleep -Seconds 5
+              $elapsedTime += 5
+          }
+
+          if ($elapsedTime -ge $timeout) {
+              Write-Host "Timeout waiting for services to start."
+              exit 1
+          }
+
+          Write-Host "Services are ready"
 
       - name: Setup (on Linux)
         if: runner.os == 'Linux'
