@@ -34,7 +34,7 @@ class EventEmitter {
   once(name, fn) {
     const dispose = (...args) => {
       this.remove(name, dispose);
-      return fn(...args);
+      return void fn(...args);
     };
     this.on(name, dispose);
   }
@@ -50,17 +50,18 @@ class EventEmitter {
   remove(name, fn) {
     const event = this.events.get(name);
     if (!event) return;
-    if (event.has(fn)) event.delete(fn);
+    event.delete(fn);
   }
 
   clear(name) {
     if (!name) return void this.events.clear();
     this.events.delete(name);
   }
-
-  static once(emitter, name) {
-    return new Promise((resolve) => emitter.once(name, resolve));
-  }
 }
 
-export default EventEmitter;
+const once = (emitter, name) =>
+  new Promise((resolve) => {
+    emitter.once(name, resolve);
+  });
+
+export { EventEmitter, once };

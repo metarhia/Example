@@ -1,4 +1,4 @@
-import EventEmitter from '/events.js';
+import { EventEmitter } from './events.js';
 
 const ID_LENGTH = 4;
 
@@ -132,12 +132,12 @@ class MetaReadable extends EventEmitter {
 }
 
 class MetaWritable extends EventEmitter {
-  constructor(transport, options = {}) {
+  constructor(id, name, size, transport) {
     super();
+    this.id = id;
+    this.name = name;
+    this.size = size;
     this.transport = transport;
-    this.id = options.id;
-    this.name = options.name;
-    this.size = options.size;
     this.init();
   }
 
