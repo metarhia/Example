@@ -1,4 +1,4 @@
-import EventEmitter from './events.js';
+import { EventEmitter } from './events.js';
 import { chunkDecode, MetaReadable, MetaWritable } from './streams.js';
 
 const CALL_TIMEOUT = 7 * 1000;
@@ -7,11 +7,13 @@ const RECONNECT_TIMEOUT = 2 * 1000;
 
 const connections = new Set();
 
-window.addEventListener('online', () => {
-  for (const connection of connections) {
-    if (!connection.connected) connection.open();
-  }
-});
+if (window) {
+  window.addEventListener('online', () => {
+    for (const connection of connections) {
+      if (!connection.connected) connection.open();
+    }
+  });
+}
 
 class MetacomError extends Error {
   constructor({ message, code }) {
@@ -62,9 +64,8 @@ class Metacom extends EventEmitter {
 
   createStream(name, size) {
     const id = ++this.streamId;
-    const initData = { type: 'stream', id, name, size };
     const transport = this;
-    return new MetaWritable(transport, initData);
+    return new MetaWritable(id, name, size, transport);
   }
 
   createBlobUploader(blob) {
@@ -121,8 +122,7 @@ class Metacom extends EventEmitter {
         if (stream) {
           console.error(new Error(`Stream ${name} is already initialized`));
         } else {
-          const streamData = { id, name, size };
-          const stream = new MetaReadable(streamData);
+          const stream = new MetaReadable(id, name, size);
           this.streams.set(id, stream);
         }
       } else if (!stream) {
