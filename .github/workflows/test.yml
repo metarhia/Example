@@ -1,25 +1,21 @@
 name: Testing CI
-
 on: pull_request
-
 jobs:
   build:
     runs-on: ${{ matrix.os }}
-
     strategy:
       matrix:
         node:
           - 18
           - 20
+          - 21
         os:
           - ubuntu-latest
-
     services:
       redis:
         image: redis:7
         ports:
           - 6379:6379
-
     steps:
       - uses: actions/checkout@v4
       - name: Use Node.js ${{ matrix.node }}
