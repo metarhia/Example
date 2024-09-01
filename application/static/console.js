@@ -460,7 +460,7 @@ class Application {
       saveFile('home.md', file);
     } else if (args[0] === 'counter') {
       const packet = await api.example.counter();
-      application.print(`counter: ${packet.result}`);
+      this.print(`counter: ${packet.result}`);
     }
     commandLoop();
   }
