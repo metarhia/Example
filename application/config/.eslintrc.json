@@ -1,5 +1,0 @@
-{
-  "rules": {
-    "strict": ["error", "never"]
-  }
-}
