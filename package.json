@@ -45,9 +45,9 @@
   "scripts": {
     "test": "npm run lint && npm run types && MODE=test node server.js",
     "dotest": "npm run lint && npm run types && node server.js",
-    "types": "tsc",
-    "lint": "eslint . && prettier -c \"**/*.js\" \"**/*.json\" \"**/*.md\" \"**/*.yml\" \"**/*.ts\"",
-    "fmt": "prettier --write \"**/*.js\" \"**/*.json\" \"**/*.md\" \"**/*.yml\" \"**/*.ts\"",
+    "types": "tsc -p tsconfig.json",
+    "lint": "eslint . && prettier -c \"**/*.js\" \"**/*.json\" \"**/*.md\"",
+    "fix": "eslint . --fix && prettier --write \"**/*.js\" \"**/*.json\" \"**/*.md\"",
     "db": "metasql c"
   },
   "engines": {
