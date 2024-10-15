@@ -65,7 +65,7 @@
   "dependencies": {
     "impress": "^3.0.16",
     "metasql": "^3.0.0-alpha.3",
-    "pg": "^8.12.0",
+    "pg": "^8.13.0",
     "redis": "^4.7.0"
   }
 }
