@@ -1,22 +1,26 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <title>Metarhia Console</title>
   <meta charset="utf-8">
-  <meta http-equiv="Content-Security-Policy" content="connect-src 'self' wss:; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com">
+  <meta http-equiv="Content-Security-Policy"
+    content="connect-src 'self' wss:; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com">
   <link rel="stylesheet" href="/console.css">
   <script src="/console.js" type="module"></script>
   <meta name="HandheldFriendly" content="true" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   <link rel="apple-touch-icon-precomposed" href="/favicon.png" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no" />
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no" />
   <meta name="format-detection" content="telephone=no">
   <link rel="shortcut icon" href="/favicon.ico" type="image/vnd.microsoft.icon" />
   <link rel="icon" href="/favicon.ico" type="image/vnd.microsoft.icon" />
   <link rel="apple-touch-icon" href="/favicon.png" />
   <link href='https://fonts.googleapis.com/css?family=Share+Tech+Mono' rel='stylesheet' type='text/css'>
 </head>
+
 <body>
   <div id="screenConsole">
     <div id="panelColors">
@@ -35,12 +39,65 @@
       <div class="colorL"></div>
       <div class="colorL spacer"></div>
     </div>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+      <div class="modal-content">
+        <h2>Login</h2>
+        <form id="loginForm">
+          <div class="form-group">
+            <label for="loginUsername">Username:</label>
+            <input type="text" id="loginUsername" required>
+          </div>
+          <div class="form-group">
+            <label for="loginPassword">Password:</label>
+            <input type="password" id="loginPassword" required>
+          </div>
+          <div class="form-actions">
+            <button type="submit">Login</button>
+            <button type="button" class="close-modal">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Signup Modal -->
+    <div id="signupModal" class="modal">
+      <div class="modal-content">
+        <h2>Sign Up</h2>
+        <form id="signupForm">
+          <div class="form-group">
+            <label for="signupUsername">Username:</label>
+            <input type="text" id="signupUsername" required>
+          </div>
+          <div class="form-group">
+            <label for="signupPassword">Password:</label>
+            <input type="password" id="signupPassword" required>
+          </div>
+          <div class="form-group">
+            <label for="signupFullName">Full Name:</label>
+            <input type="text" id="signupFullName" required>
+          </div>
+          <div class="form-actions">
+            <button type="submit">Sign Up</button>
+            <button type="button" class="close-modal">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
     <div id="panelScroll">
       <div id="controlScroll"></div>
     </div>
     <div id="panelConsole">
       <div id="controlShadow">
-        <div><img width="240" src="/metarhia.svg" /></div>
+        <div class="header-content">
+          <div class="logo"><img width="240" src="/metarhia.svg" /></div>
+          <div class="auth-links">
+            <a href="#" id="loginLink">Login</a>
+            <a href="#" id="signupLink">SignUp</a>
+          </div>
+        </div>
       </div>
       <div id="controlBrowse">
         <div id="colsoleIndent"></div>
@@ -51,4 +108,5 @@
     </div>
   </div>
 </body>
+
 </html>

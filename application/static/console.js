@@ -466,20 +466,159 @@ class Application {
   }
 }
 
+class Auth {
+  constructor(application) {
+    this.application = application;
+    this.setupEventListeners();
+  }
+
+  setupEventListeners() {
+    // Modal triggers
+    document
+      .getElementById('loginLink')
+      .addEventListener('click', () => this.showModal('loginModal'));
+    document
+      .getElementById('signupLink')
+      .addEventListener('click', () => this.showModal('signupModal'));
+
+    // Close buttons
+    document.querySelectorAll('.close-modal').forEach((button) => {
+      button.addEventListener('click', () => this.closeModals());
+    });
+
+    // Close on outside click
+    document.querySelectorAll('.modal').forEach((modal) => {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) this.closeModals();
+      });
+    });
+
+    // Form submissions
+    document
+      .getElementById('loginForm')
+      .addEventListener('submit', (e) => this.handleLogin(e));
+    document
+      .getElementById('signupForm')
+      .addEventListener('submit', (e) => this.handleSignup(e));
+
+    // Handle Escape key
+    document.addEventListener('keydown', (e) => {
+      if (
+        e.key === 'Escape' &&
+        document.querySelector('.modal[style*="display: block"]')
+      ) {
+        this.closeModals();
+      }
+    });
+  }
+
+  showModal(modalId) {
+    this.closeModals();
+    const modal = document.getElementById(modalId);
+    modal.style.display = 'block';
+
+    // Disable console input
+    this.application.controlInput.inputActive = false;
+
+    // Focus first input in modal
+    const firstInput = modal.querySelector('input');
+    if (firstInput) {
+      setTimeout(() => firstInput.focus(), 0);
+    }
+  }
+
+  closeModals() {
+    document.querySelectorAll('.modal').forEach((modal) => {
+      modal.style.display = 'none';
+    });
+    document.querySelectorAll('.error-message').forEach((error) => {
+      error.remove();
+    });
+
+    // Re-enable and focus console input
+    this.application.controlInput.inputActive = true;
+    this.application.controlInput.style.display = 'block';
+    this.application.controlBrowse.appendChild(this.application.controlInput);
+  }
+
+  showError(formId, message) {
+    const form = document.getElementById(formId);
+    const existingError = form.querySelector('.error-message');
+    if (existingError) existingError.remove();
+
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'error-message';
+    errorDiv.textContent = message;
+    form.insertBefore(errorDiv, form.querySelector('.form-actions'));
+  }
+
+  async handleLogin(e) {
+    e.preventDefault();
+    const username = document.getElementById('loginUsername').value;
+    const password = document.getElementById('loginPassword').value;
+
+    try {
+      const res = await api.auth.signin({ login: username, password });
+      if (res.token) {
+        localStorage.setItem('metarhia.session.token', res.token);
+        this.application.logged = true;
+        this.application.print('Successfully logged in');
+        this.closeModals();
+      } else {
+        this.showError(
+          'loginForm',
+          'Login failed. Please check your credentials.',
+        );
+      }
+    } catch (error) {
+      this.showError(
+        'loginForm',
+        error.message || 'Login failed. Please try again.',
+      );
+    }
+  }
+
+  async handleSignup(e) {
+    e.preventDefault();
+    const username = document.getElementById('signupUsername').value;
+    const password = document.getElementById('signupPassword').value;
+    const fullName = document.getElementById('signupFullName').value;
+
+    try {
+      const res = await api.auth.register({
+        login: username,
+        password,
+        fullName,
+      });
+      if (res.status === 'success') {
+        this.application.print('Successfully registered. You can now log in.');
+        this.closeModals();
+        this.showModal('loginModal');
+      } else {
+        this.showError('signupForm', 'Registration failed. Please try again.');
+      }
+    } catch (error) {
+      this.showError(
+        'signupForm',
+        error.message || 'Registration failed. Please try again.',
+      );
+    }
+  }
+}
+
 window.addEventListener('load', async () => {
   const application = new Application();
   await application.metacom.load('auth', 'console', 'example', 'files');
+
+  // Initialize Auth after metacom is loaded
+  application.auth = new Auth(application);
+
   const token = localStorage.getItem('metarhia.session.token');
   if (token) {
     const res = await api.auth.restore({ token });
     application.logged = res.status === 'logged';
   }
-  if (!application.logged) {
-    const res = await api.auth.signin({ login: 'marcus', password: 'marcus' });
-    if (res.token) {
-      localStorage.setItem('metarhia.session.token', res.token);
-    }
-  }
+
   const { text } = await api.console.content({ name: 'home' });
   application.print(text);
   commandLoop();

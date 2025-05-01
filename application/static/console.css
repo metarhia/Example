@@ -5,10 +5,12 @@
   cursor: default;
   -moz-user-select: inherit;
 }
-a, a * {
+a,
+a * {
   cursor: pointer;
 }
-html, body {
+html,
+body {
   padding: 0;
   margin: 0;
   font-family: 'Share Tech Mono';
@@ -16,13 +18,13 @@ html, body {
   overflow: hidden;
   height: 100%;
   background: #000;
-  color: #FFF;
+  color: #fff;
 }
 body {
   height: 100%;
 }
 a {
-  background: #7FD900;
+  background: #7fd900;
   color: #000;
   padding: 1px 4px;
   margin: 1px 0;
@@ -33,24 +35,25 @@ a {
   display: inline-block;
 }
 a.mail {
-  background: #FF7777;
+  background: #ff7777;
 }
 a.web {
-  background: #3399FF;
+  background: #3399ff;
 }
 a.base {
-  background: #F2F200;
+  background: #f2f200;
 }
 a.partnership {
-  background: #FF6600;
+  background: #ff6600;
 }
 a.services {
   background: #009933;
 }
 a:hover {
-  background: #FFFFFF;
+  background: #ffffff;
 }
-input, textarea {
+input,
+textarea {
   -webkit-border-radius: 0;
   -webkit-touch-callout: text;
   -webkit-user-select: text;
@@ -59,7 +62,8 @@ input, textarea {
   -ms-user-select: text;
   user-select: text;
 }
-ul,ol {
+ul,
+ol {
   padding: 0 0 0 30px;
 }
 #screenConsole {
@@ -72,20 +76,46 @@ ul,ol {
   height: 100%;
   width: 8px;
   float: left;
-  background: #FF0000;
+  background: #ff0000;
 }
-.colorA { background: #AA0077; height: 40px; }
-.colorB { background: #552277; }
-.colorC { background: #2222BB; }
-.colorD { background: #0033DD; }
-.colorE { background: #006699; }
-.colorF { background: #009933; }
-.colorG { background: #7FD900; }
-.colorH { background: #F2F200; }
-.colorI { background: #FFBF00; }
-.colorJ { background: #FF8C00; }
-.colorK { background: #FF3300; }
-.colorL { background: #FF0000; height: 40px; }
+.colorA {
+  background: #aa0077;
+  height: 40px;
+}
+.colorB {
+  background: #552277;
+}
+.colorC {
+  background: #2222bb;
+}
+.colorD {
+  background: #0033dd;
+}
+.colorE {
+  background: #006699;
+}
+.colorF {
+  background: #009933;
+}
+.colorG {
+  background: #7fd900;
+}
+.colorH {
+  background: #f2f200;
+}
+.colorI {
+  background: #ffbf00;
+}
+.colorJ {
+  background: #ff8c00;
+}
+.colorK {
+  background: #ff3300;
+}
+.colorL {
+  background: #ff0000;
+  height: 40px;
+}
 #panelLogo {
   margin: 4px;
   position: absolute;
@@ -127,7 +157,7 @@ ul,ol {
   left: 0;
   right: 0;
   height: 68px;
-  box-shadow: 0px 0px 20px 6px rgba(0,0,0,1);
+  box-shadow: 0px 0px 20px 6px rgba(0, 0, 0, 1);
   z-index: 1;
 }
 #controlBrowse {
@@ -147,7 +177,7 @@ ul,ol {
 #controlBrowse th {
   padding: 2px 4px;
   font-weight: bold;
-  color: #FFBF00;
+  color: #ffbf00;
 }
 #controlBrowse tr:nth-child(even) {
   background: #101010;
@@ -163,7 +193,9 @@ ul,ol {
   margin-left: 2px;
 }
 @keyframes blinker {
-  50% { opacity: 0.0; }
+  50% {
+    opacity: 0;
+  }
 }
 #controlKeyboard {
   background: #000;
@@ -192,4 +224,117 @@ ul,ol {
 .header {
   color: #fff;
   font-weight: bold;
+}
+
+/* Header Content */
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+}
+
+.logo {
+  flex: 0 0 auto;
+}
+
+.auth-links {
+  display: flex;
+  gap: 10px;
+  margin-left: 20px;
+}
+
+.auth-links a {
+  font-size: 10pt;
+  padding: 2px 8px;
+  margin: 0;
+  background: #009933;
+}
+
+.auth-links a:hover {
+  background: #7fd900;
+}
+
+/* Modal Styles */
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  z-index: 1000;
+}
+
+.modal-content {
+  position: relative;
+  background: #262626;
+  margin: 15% auto;
+  padding: 20px;
+  width: 80%;
+  max-width: 500px;
+  border: 1px solid #009933;
+  box-sizing: border-box;
+}
+
+.modal h2 {
+  color: #7fd900;
+  margin-bottom: 20px;
+  font-family: 'Share Tech Mono';
+}
+
+.form-group {
+  margin-bottom: 15px;
+  padding-right: 20px;
+}
+
+.form-group label {
+  display: block;
+  color: #009933;
+  margin-bottom: 5px;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 8px;
+  background: #000;
+  border: 1px solid #009933;
+  color: #fff;
+  font-family: 'Share Tech Mono';
+}
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.form-actions button {
+  background: #009933;
+  color: #000;
+  border: none;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-family: 'Share Tech Mono';
+  transition: background-color 0.3s;
+}
+
+.form-actions button:hover {
+  background: #7fd900;
+}
+
+.form-actions button.close-modal {
+  background: #aa0077;
+}
+
+.form-actions button.close-modal:hover {
+  background: #ff0000;
+}
+
+.error-message {
+  color: #ff0000;
+  margin-top: 5px;
+  font-size: 0.9em;
 }
