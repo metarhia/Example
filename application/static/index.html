@@ -54,8 +54,8 @@
             <input type="password" id="loginPassword" required>
           </div>
           <div class="form-actions">
-            <button type="submit">Login</button>
             <button type="button" class="close-modal">Cancel</button>
+            <button type="submit">Login</button>
           </div>
         </form>
       </div>
@@ -71,6 +71,10 @@
             <input type="text" id="signupUsername" required>
           </div>
           <div class="form-group">
+            <label for="signupEmail">Email:</label>
+            <input type="email" id="signupEmail" required>
+          </div>
+          <div class="form-group">
             <label for="signupPassword">Password:</label>
             <input type="password" id="signupPassword" required>
           </div>
@@ -79,7 +83,24 @@
             <input type="text" id="signupFullName" required>
           </div>
           <div class="form-actions">
+            <button type="button" class="close-modal">Cancel</button>
             <button type="submit">Sign Up</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Upload Modal -->
+    <div id="uploadModal" class="modal">
+      <div class="modal-content">
+        <h2>Upload File</h2>
+        <form id="uploadForm">
+          <div class="form-group">
+            <label for="uploadFile">Select file:</label>
+            <input type="file" id="uploadFile" required />
+          </div>
+          <div class="form-actions">
+            <button type="submit">Upload</button>
             <button type="button" class="close-modal">Cancel</button>
           </div>
         </form>
@@ -94,6 +115,8 @@
         <div class="header-content">
           <div class="logo"><img width="240" src="/metarhia.svg" /></div>
           <div class="auth-links">
+            <a href="#" id="uploadLink">Upload</a>
+            <a href="#" id="testLoginBtn">Test</a>
             <a href="#" id="loginLink">Login</a>
             <a href="#" id="signupLink">SignUp</a>
           </div>

@@ -1,9 +1,23 @@
 ({
   access: 'public',
-  method: async ({ login, password, fullName }) => {
-    const hash = await metarhia.metautil.hashPassword(password);
-    await api.auth.provider.registerUser(login, hash, fullName);
-    const token = await context.client.startSession();
-    return { status: 'success', token };
+  method: async ({ login, email, password, fullName, avatar = '' }) => {
+    try {
+      const hash = await metarhia.metautil.hashPassword(password);
+      await api.auth.provider.registerUser(
+        login,
+        email,
+        hash,
+        fullName,
+        avatar,
+      );
+      const token = await context.client.startSession();
+      return { status: 'success', token };
+    } catch (error) {
+      console.error('Registration error:', error);
+      return {
+        status: 'failed',
+        error: error.message || 'Registration failed',
+      };
+    }
   },
 });

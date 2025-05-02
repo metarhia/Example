@@ -8,10 +8,22 @@ ALTER TABLE "Role" ADD CONSTRAINT "pkRole" PRIMARY KEY ("roleId");
 CREATE TABLE "Account" (
   "accountId" bigint generated always as identity,
   "login" varchar(64) NOT NULL,
-  "password" varchar NOT NULL
+  "password" varchar NOT NULL,
+  "fullName" varchar NOT NULL
 );
 
 ALTER TABLE "Account" ADD CONSTRAINT "pkAccount" PRIMARY KEY ("accountId");
+ALTER TABLE "Account" ADD CONSTRAINT "unqAccountLogin" UNIQUE ("login");
+
+CREATE TABLE "AccountData" (
+  "accountId" bigint NOT NULL,
+  "fullName" varchar,
+  "email" varchar,
+  "avatar" varchar
+);
+
+ALTER TABLE "AccountData" ADD CONSTRAINT "pkAccountData" PRIMARY KEY ("accountId");
+ALTER TABLE "AccountData" ADD CONSTRAINT "fkAccountDataAccount" FOREIGN KEY ("accountId") REFERENCES "Account" ("accountId") ON DELETE CASCADE;
 
 CREATE TABLE "AccountRole" (
   "accountId" bigint NOT NULL,
@@ -19,7 +31,7 @@ CREATE TABLE "AccountRole" (
 );
 
 ALTER TABLE "AccountRole" ADD CONSTRAINT "pkAccountRole" PRIMARY KEY ("accountId", "roleId");
-ALTER TABLE "AccountRole" ADD CONSTRAINT "fkAccountRoleAccount" FOREIGN KEY ("accountId") REFERENCES "Account" ("accountId");
+ALTER TABLE "AccountRole" ADD CONSTRAINT "fkAccountRoleAccount" FOREIGN KEY ("accountId") REFERENCES "Account" ("accountId") ON DELETE CASCADE;
 ALTER TABLE "AccountRole" ADD CONSTRAINT "fkAccountRoleRole" FOREIGN KEY ("roleId") REFERENCES "Role" ("roleId");
 
 CREATE TABLE "Country" (

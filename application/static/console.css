@@ -261,21 +261,24 @@ ol {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.8);
+  width: 100vw;
+  height: 100vh;
   z-index: 1000;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(2px);
+  justify-content: center;
+  align-items: center;
 }
 
 .modal-content {
   position: relative;
   background: #262626;
-  margin: 15% auto;
   padding: 20px;
   width: 80%;
   max-width: 500px;
   border: 1px solid #009933;
   box-sizing: border-box;
+  z-index: 1002;
 }
 
 .modal h2 {
@@ -302,6 +305,27 @@ ol {
   border: 1px solid #009933;
   color: #fff;
   font-family: 'Share Tech Mono';
+}
+
+/* Autofill styles for Chrome/Safari */
+.form-group input:-webkit-autofill,
+.form-group input:-webkit-autofill:hover,
+.form-group input:-webkit-autofill:focus,
+.form-group input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px #000 inset !important;
+  -webkit-text-fill-color: #fff !important;
+  caret-color: #fff !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Autofill styles for Firefox */
+.form-group input:autofill,
+.form-group input:autofill:hover,
+.form-group input:autofill:focus,
+.form-group input:autofill:active {
+  box-shadow: 0 0 0 30px #000 inset !important;
+  -webkit-text-fill-color: #fff !important;
+  caret-color: #fff !important;
 }
 
 .form-actions {

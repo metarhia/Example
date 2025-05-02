@@ -21,6 +21,12 @@ INSERT INTO "AccountRole" ("accountId", "roleId") VALUES
   (3, 2),
   (4, 2);
 
+INSERT INTO "AccountData" ("accountId", "fullName", "email", "avatar") VALUES
+  (1, 'Admin', 'admin@metarhia.com', ''),
+  (2, 'Marcus Aurelius', 'marcus@example.com', ''),
+  (3, 'Guest User', 'user@example.com', ''),
+  (4, 'Fasil Iskandar', 'iskandar@example.com', '');
+
 INSERT INTO "Country" ("name") VALUES
   ('Soviet Union'),
   ('People''s Republic of China'),

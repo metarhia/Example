@@ -30,8 +30,43 @@
     return db.pg.delete('Session', { token });
   },
 
-  async registerUser(login, password) {
-    return db.pg.insert('Account', { login, password });
+  async registerUser(login, email, hash, fullName, avatar = '') {
+    const DEFAULT_ROLE = 4;
+    try {
+      // First, try to create the Account
+      const res = await db.pg.insert('Account', { login, password: hash }, [
+        'accountId',
+      ]);
+
+      try {
+        // Then create related records in parallel
+        await Promise.all([
+          db.pg.insert('AccountRole', {
+            accountId: res.accountId,
+            roleId: DEFAULT_ROLE,
+          }),
+          db.pg.insert('AccountData', {
+            accountId: res.accountId,
+            fullName,
+            email,
+            avatar,
+          }),
+        ]);
+        return res;
+      } catch (error) {
+        // If related records fail to insert, clean up by deleting the Account
+        await db.pg.delete('Account', { accountId: res.accountId });
+        console.error('Failed to create related records:', error);
+        throw new Error('Failed to complete registration');
+      }
+    } catch (error) {
+      console.error('Failed to create account:', error);
+      if (error.code === '23505') {
+        // PostgreSQL unique violation error code
+        throw new Error('Username already exists');
+      }
+      throw new Error('Registration failed');
+    }
   },
 
   async getUser(login) {

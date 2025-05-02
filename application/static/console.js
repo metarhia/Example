@@ -515,7 +515,7 @@ class Auth {
   showModal(modalId) {
     this.closeModals();
     const modal = document.getElementById(modalId);
-    modal.style.display = 'block';
+    modal.style.display = 'flex';
 
     // Disable console input
     this.application.controlInput.inputActive = false;
@@ -581,6 +581,7 @@ class Auth {
   async handleSignup(e) {
     e.preventDefault();
     const username = document.getElementById('signupUsername').value;
+    const email = document.getElementById('signupEmail').value;
     const password = document.getElementById('signupPassword').value;
     const fullName = document.getElementById('signupFullName').value;
 
@@ -589,6 +590,7 @@ class Auth {
         login: username,
         password,
         fullName,
+        email,
       });
       if (res.status === 'success') {
         this.application.print('Successfully registered. You can now log in.');
@@ -608,10 +610,65 @@ class Auth {
 
 window.addEventListener('load', async () => {
   const application = new Application();
-  await application.metacom.load('auth', 'console', 'example', 'files');
+  await application.metacom.load('auth', 'console', 'example', 'files', 'test');
 
   // Initialize Auth after metacom is loaded
   application.auth = new Auth(application);
+
+  // Register Test button event handler after API is loaded
+  const testBtn = document.getElementById('testLoginBtn');
+  if (testBtn) {
+    testBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      try {
+        const res = await api.test.test({ name: 'context' });
+        window.alert('Test result: ' + JSON.stringify(res));
+      } catch (err) {
+        window.alert('Test error: ' + (err.message || err));
+      }
+    });
+  }
+
+  // Upload link and modal logic
+  const uploadLink = document.getElementById('uploadLink');
+  const uploadModal = document.getElementById('uploadModal');
+  const uploadForm = document.getElementById('uploadForm');
+  const uploadFileInput = document.getElementById('uploadFile');
+
+  if (uploadLink && uploadModal && uploadForm && uploadFileInput) {
+    uploadLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      document.querySelectorAll('.modal').forEach((modal) => {
+        modal.style.display = 'none';
+      });
+      uploadModal.style.display = 'flex';
+      uploadFileInput.value = '';
+      setTimeout(() => uploadFileInput.focus(), 0);
+      application.controlInput.inputActive = false;
+    });
+
+    uploadForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const file = uploadFileInput.files[0];
+      if (!file) {
+        window.alert('Please select a file to upload.');
+        return;
+      }
+      try {
+        // Create a Metacom blob uploader
+        const uploader = application.metacom.createBlobUploader(file);
+        // Prepare backend file consumer
+        await api.files.upload({ streamId: uploader.id, name: file.name });
+        // Start uploading stream and wait for its end
+        await uploader.upload();
+        window.alert('File uploaded successfully!');
+        uploadModal.style.display = 'none';
+        application.controlInput.inputActive = true;
+      } catch (err) {
+        window.alert('Upload failed: ' + (err.message || err));
+      }
+    });
+  }
 
   const token = localStorage.getItem('metarhia.session.token');
   if (token) {
