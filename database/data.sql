@@ -22,15 +22,16 @@ INSERT INTO "AccountRole" ("accountId", "roleId") VALUES
   (4, 2);
 
 INSERT INTO "Country" ("name") VALUES
+  ('Ukraine'),
   ('Soviet Union'),
   ('People''s Republic of China'),
   ('Vietnam'),
   ('Cuba');
 
 INSERT INTO "City" ("name", "countryId") VALUES
-  ('Beijing', 2),
-  ('Wuhan', 2),
+  ('Beijing', 3),
+  ('Wuhan', 3),
   ('Kiev', 1),
-  ('Havana', 4),
-  ('Hanoi', 3),
-  ('Kaliningrad', 1);
+  ('Havana', 5),
+  ('Hanoi', 4),
+  ('Kaliningrad', 2);
