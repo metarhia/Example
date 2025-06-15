@@ -31,7 +31,7 @@ INSERT INTO "Country" ("name") VALUES
 INSERT INTO "City" ("name", "countryId") VALUES
   ('Beijing', 3),
   ('Wuhan', 3),
-  ('Kiev', 1),
+  ('Kyiv', 1),
   ('Havana', 5),
   ('Hanoi', 4),
   ('Kaliningrad', 2);
