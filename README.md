@@ -52,15 +52,69 @@ let's start with
 
 ## Usage
 
-- You need node.js 18.x or 20.x
+- You need Node.js 18.x or higher (24.x preferred)
 - Fork and clone this repository (optionally subscribe to repo changes)
 - Run `npm i` to install dependencies and generate RSA certificate
 - Remove unneeded dependencies if your project doesn't require them
 - Add your license to `LICENSE` file but don't remove starter kit license
 - Start your project modifying this starter kit
-- If you have Docker and Docker Compose installed to run the project, use the command: `docker-compose up`
+
+## Docker Usage
+
+The easiest way to run this application is using Docker and Docker Compose:
+
+### Prerequisites
+
+- Docker and Docker Compose installed
+- No need to install PostgreSQL or Redis locally
+- Uses PostgreSQL 17 (latest stable) and Redis 8
+
+### Quick Start
+
+```bash
+# Start all services (API, PostgreSQL, Redis)
+docker-compose up
+
+# Start services in background (detached mode)
+docker-compose up -d
+
+# Stop all services
+docker-compose down
+
+# View logs
+docker-compose logs
+
+# View logs for specific service
+docker-compose logs api-example
+docker-compose logs pg-example
+docker-compose logs redis-example
+
+# Rebuild and start services
+docker-compose up --build -d
+```
+
+### Access Points
+
+- **Main Application**: http://localhost:8002/ (Metarhia Console)
+- **API Endpoints**: http://localhost:8001/api/
+- **Load Balancer**: http://localhost:8000/ (redirects to 8002)
+
+### Service Status
+
+```bash
+# Check running services
+docker-compose ps
+
+# Restart a specific service
+docker-compose restart api-example
+```
+
+## Manual Installation (Alternative)
+
+If you prefer to run without Docker:
+
 - Before running server initialize the DB:
-  - First of all, make sure you have PostgreSQL installed (preferably 12.x to 16.x).
+  - First of all, make sure you have PostgreSQL installed (preferably 15.x to 17.x).
   - Run database initialization script: `database/setup.sh`
 - Run project: `node server.js` and stop with Ctrl+C
 - Ask questions in Telegram https://t.me/nodeua (node.js related) or
