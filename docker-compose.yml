@@ -8,8 +8,10 @@ services:
       - DB_HOST=pg-example
       - REDIS_HOST=redis-example
     depends_on:
-      - pg-example
-      - redis-example
+      pg-example:
+        condition: service_healthy
+      redis-example:
+        condition: service_started
     ports:
       - "127.0.0.1:8000:8000"
       - "127.0.0.1:8001:8001"
@@ -25,8 +27,11 @@ services:
       - POSTGRES_DB=application
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./database/seeds:/docker-entrypoint-initdb.d:ro
     ports:
       - "127.0.0.1:5432:5432"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "marcus"]
     restart: always
 
   redis-example:
