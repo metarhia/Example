@@ -8,5 +8,5 @@ async ({ name, type }) => {
   const writable = context.client.createStream(name, size);
   // Pipe nodejs readable to metacom writable
   readable.pipe(writable);
-  return { streamId: writable.streamId, type };
+  return { streamId: writable.id, type };
 };
