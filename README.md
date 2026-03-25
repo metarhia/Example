@@ -120,7 +120,11 @@ If you prefer to run without Docker:
 - Ask questions in Telegram https://t.me/nodeua (node.js related) or
   https://t.me/metaserverless (metarhia related)
 
+## AI and agent config
+
+Project rules and skills live in **`.ai/`** (IDE- and platform-independent); templates and hook docs in **`docs/ai/`**. See [AGENTS.md](./AGENTS.md). **Cursor / Claude Code / Windsurf / GitHub Copilot users:** after clone run `npm run link:cursor`, `npm run link:claude`, `npm run link:windsurf`, or `npm run link:github` (or `npm run link:all`) **before** opening the project. If the IDE already created a real folder, remove it then run the same command again. For GitHub, only `.github/rules` and `.github/skills` are linked so `.github/workflows` etc. can stay in git.
+
 ## License
 
-Copyright (c) 2020-2025 Metarhia contributors.
+Copyright (c) 2020-2026 Metarhia contributors.
 This starter kit is [MIT licensed](./LICENSE).
