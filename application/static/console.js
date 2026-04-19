@@ -335,7 +335,11 @@ class Application {
     this.keyboard = new Keyboard(this);
     this.scroller = new Scroller(this);
     const protocol = location.protocol === 'http:' ? 'ws' : 'wss';
-    this.metacom = Metacom.create(`${protocol}://${location.host}/api`);
+    return this.init(`${protocol}://${location.host}/api`);
+  }
+
+  async init(url) {
+    this.metacom = await Metacom.connect(url);
     window.api = this.metacom.api;
     window.application = this;
   }
@@ -467,7 +471,7 @@ class Application {
 }
 
 window.addEventListener('load', async () => {
-  const application = new Application();
+  const application = await new Application();
   await application.metacom.load('auth', 'console', 'example', 'files');
   const token = localStorage.getItem('metarhia.session.token');
   if (token) {

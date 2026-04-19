@@ -1,7 +1,7 @@
 const files = [
   '/',
   '/console.css',
-  '/events.js',
+  '/metautil.js',
   '/console.js',
   '/metacom.js',
   '/favicon.ico',
