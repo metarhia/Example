@@ -59,38 +59,10 @@ let's start with
 - Add your license to `LICENSE` file but don't remove starter kit license
 - Start your project modifying this starter kit
 
-## Docker Usage
-
-The easiest way to run this application is using Docker and Docker Compose:
-
-### Prerequisites
-
-- Docker and Docker Compose installed
-- No need to install PostgreSQL or Redis locally
-- Uses PostgreSQL 17 (latest stable) and Redis 8
-
 ### Quick Start
 
 ```bash
-# Start all services (API, PostgreSQL, Redis)
-docker-compose up
-
-# Start services in background (detached mode)
-docker-compose up -d
-
-# Stop all services
-docker-compose down
-
-# View logs
-docker-compose logs
-
-# View logs for specific service
-docker-compose logs api-example
-docker-compose logs pg-example
-docker-compose logs redis-example
-
-# Rebuild and start services
-docker-compose up --build -d
+node server
 ```
 
 ### Access Points
@@ -98,31 +70,6 @@ docker-compose up --build -d
 - **Main Application**: http://localhost:8002/ (Metarhia Console)
 - **API Endpoints**: http://localhost:8001/api/
 - **Load Balancer**: http://localhost:8000/ (redirects to 8002)
-
-### Service Status
-
-```bash
-# Check running services
-docker-compose ps
-
-# Restart a specific service
-docker-compose restart api-example
-```
-
-## Manual Installation (Alternative)
-
-If you prefer to run without Docker:
-
-- Before running server initialize the DB:
-  - First of all, make sure you have PostgreSQL installed (preferably 15.x to 17.x).
-  - Run database initialization script: `database/setup.sh`
-- Run project: `node server.js` and stop with Ctrl+C
-- Ask questions in Telegram https://t.me/nodeua (node.js related) or
-  https://t.me/metaserverless (metarhia related)
-
-## AI and agent config
-
-Project rules and skills live in **`.ai/`** (IDE- and platform-independent); templates and hook docs in **`docs/ai/`**. See [AGENTS.md](./AGENTS.md). **Cursor / Claude Code / Windsurf / GitHub Copilot users:** after clone run `npm run link:cursor`, `npm run link:claude`, `npm run link:windsurf`, or `npm run link:github` (or `npm run link:all`) **before** opening the project. If the IDE already created a real folder, remove it then run the same command again. For GitHub, only `.github/rules` and `.github/skills` are linked so `.github/workflows` etc. can stay in git.
 
 ## License
 
