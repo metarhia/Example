@@ -7,8 +7,8 @@
   },
 
   get({ key }) {
-    const res = this.values.get(key);
-    console.debug({ get: key, return: res });
-    return res;
+    const value = this.values.get(key);
+    console.debug({ get: key, return: value });
+    return value;
   },
 });

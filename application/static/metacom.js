@@ -169,8 +169,8 @@ class Metacom extends EventEmitter {
     return (method) =>
       async (args = {}) => {
         const id = ++this.callId;
-        const unitName = unit + (ver ? '.' + ver : '');
-        const target = unitName + '/' + method;
+        const unitName = unit + (ver ? `.${ver}` : '');
+        const target = `${unitName}/${method}`;
         if (this.opening) await this.opening;
         if (!this.connected) await this.open();
         return new Promise((resolve, reject) => {

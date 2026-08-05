@@ -8,7 +8,7 @@
     if (!valid) throw new Error('Incorrect login or password');
     console.log(`Logged user: ${login}`);
     const token = api.auth.provider.generateToken();
-    const data = { accountId: user.accountId };
+    const data = { accountId };
     context.client.startSession(token, data);
     const { ip } = context.client;
     await api.auth.provider.createSession(token, data, { ip, accountId });

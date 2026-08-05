@@ -34,4 +34,10 @@ module.exports = [
       },
     },
   },
+  {
+    files: ['application/bus/worldTime/currentTime.js'],
+    rules: {
+      camelcase: ['error', { properties: 'never' }],
+    },
+  },
 ];

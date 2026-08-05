@@ -2,10 +2,11 @@
   access: 'public',
 
   method: async () => {
+    const { interval } = config.resmon;
     setInterval(async () => {
       const stats = await lib.resmon.getStatistics();
       context.client.emit('example/resmon', stats);
-    }, config.resmon.interval);
+    }, interval);
     return { subscribed: 'resmon' };
   },
 });

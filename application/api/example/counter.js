@@ -1,5 +1,5 @@
 async () => {
-  if (!context.session.counter) context.session.counter = 1;
-  else context.session.counter++;
-  return { result: context.session.counter };
+  const { session = { counter: 0 } } = context;
+  session.counter++;
+  return { result: session.counter };
 };
