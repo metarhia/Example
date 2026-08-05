@@ -2,9 +2,9 @@
   rooms: new Map(),
 
   getRoom(name) {
-    let room = domain.chat.rooms.get(name);
-    if (room) return room;
-    room = new Set();
+    const existing = domain.chat.rooms.get(name);
+    if (existing) return existing;
+    const room = new Set();
     domain.chat.rooms.set(name, room);
     return room;
   },

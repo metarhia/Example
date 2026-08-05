@@ -18,7 +18,7 @@
 
     const tasks = [
       { url: '/', size: 2099 },
-      { url: '/console.js', size: 14360 },
+      { url: '/console.js', size: 13862 },
       { url: '/unknown', status: 404, size: 113 },
       { url: '/unknown.png', status: 404, size: 113 },
       { url: '/unknown/unknown', status: 404 },

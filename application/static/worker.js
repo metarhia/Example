@@ -11,7 +11,11 @@ const files = [
 ];
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(caches.open('metarhia').then((cache) => cache.addAll(files)));
+  const populateCache = async () => {
+    const cache = await caches.open('metarhia');
+    await cache.addAll(files);
+  };
+  event.waitUntil(populateCache());
 });
 
 self.addEventListener('fetch', async ({ request }) => {

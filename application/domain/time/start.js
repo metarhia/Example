@@ -6,7 +6,8 @@ async () => {
       area: 'Europe',
       location: 'Rome',
     });
-    console.log(`${time.timezone} - ${time.datetime}`);
+    const { timezone, datetime } = time;
+    console.log(`${timezone} - ${datetime}`);
   } catch {
     console.log('Can not access time server');
   }

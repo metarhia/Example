@@ -47,35 +47,29 @@ const KEYBOARD_LAYOUT = [
 ];
 
 const KEY_NAME = {};
-for (const keyName in KEY_CODE) KEY_NAME[KEY_CODE[keyName]] = keyName;
+for (const [keyName, code] of Object.entries(KEY_CODE)) {
+  KEY_NAME[code] = keyName;
+}
 
-const pad = (padChar, length) => new Array(length + 1).join(padChar);
+const pad = (padChar, length) => padChar.repeat(length);
 
 const { userAgent } = navigator;
 
-const isMobile = () =>
-  userAgent.match(/Android/i) ||
-  userAgent.match(/webOS/i) ||
-  userAgent.match(/iPhone/i) ||
-  userAgent.match(/iPad/i) ||
-  userAgent.match(/iPod/i) ||
-  userAgent.match(/BlackBerry/i) ||
-  userAgent.match(/Windows Phone/i);
+const MOBILE_UA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|Windows Phone/i;
+
+const isMobile = () => MOBILE_UA.test(userAgent);
 
 const sleep = (msec) =>
   new Promise((resolve) => {
-    setTimeout(() => {
-      resolve();
-    }, msec);
+    setTimeout(resolve, msec);
   });
 
 const urlKind = (url) => {
   if (url.startsWith('mailto:')) return 'mail';
-  if (url.startsWith('http:')) return 'web';
-  if (url.startsWith('https:')) return 'web';
-  const k = url.indexOf('/');
-  if (k === -1) return 'base';
-  return url.substring(0, k);
+  if (url.startsWith('http:') || url.startsWith('https:')) return 'web';
+  const slashIndex = url.indexOf('/');
+  if (slashIndex === -1) return 'base';
+  return url.substring(0, slashIndex);
 };
 
 const followLink = async (event) => {
@@ -93,7 +87,8 @@ const followLink = async (event) => {
 const followLastMore = () => {
   const mores = document.querySelectorAll('#panelConsole a.more');
   if (mores.length === 0) return;
-  const text = mores[mores.length - 1].getAttribute('data-text');
+  const lastMore = mores.at(-1);
+  const text = lastMore.getAttribute('data-text');
   for (const more of mores) more.parentElement.remove();
   application.print(text);
 };
@@ -118,56 +113,51 @@ const inputKeyboardEvents = {
     followLastMore();
   },
   BACKSPACE() {
-    application.inputSetValue(application.controlInput.inputValue.slice(0, -1));
+    const value = application.controlInput.inputValue;
+    application.inputSetValue(value.slice(0, -1));
   },
   ENTER() {
-    let value = application.controlInput.inputValue;
-    if (application.controlInput.inputType === 'masked') {
+    const input = application.controlInput;
+    let value = input.inputValue;
+    if (input.inputType === 'masked') {
       value = pad('*', value.length);
     }
-    application.print(application.controlInput.inputPrompt + value);
-    application.controlInput.style.display = 'none';
-    application.controlInput.inputActive = false;
-    application.controlInput.inputCallback(null, value);
+    application.print(input.inputPrompt + value);
+    input.style.display = 'none';
+    input.inputActive = false;
+    input.inputCallback(null, value);
   },
   CAPS() {
-    if (application.keyboard.controlKeyboard.className === 'caps') {
-      application.keyboard.controlKeyboard.className = '';
-    } else {
-      application.keyboard.controlKeyboard.className = 'caps';
-    }
+    const keyboard = application.keyboard.controlKeyboard;
+    const isCaps = keyboard.className === 'caps';
+    keyboard.className = isCaps ? '' : 'caps';
   },
   KEY(char) {
-    // Alpha or Digit
-    if (application.keyboard.controlKeyboard.className === 'caps') {
+    const keyboard = application.keyboard.controlKeyboard;
+    if (keyboard.className === 'caps') {
       char = char.toUpperCase();
     }
-    application.inputSetValue(application.controlInput.inputValue + char);
+    const value = application.controlInput.inputValue + char;
+    application.inputSetValue(value);
   },
 };
 
 document.onkeydown = (event) => {
-  if (application.controlInput.inputActive) {
-    const keyName = KEY_NAME[event.keyCode];
-    const fn = inputKeyboardEvents[keyName];
-    if (fn) {
-      fn();
-      return false;
-    }
-  }
-  return true;
+  if (!application.controlInput.inputActive) return true;
+  const keyName = KEY_NAME[event.keyCode];
+  const fn = inputKeyboardEvents[keyName];
+  if (!fn) return true;
+  fn();
+  return false;
 };
 
 document.onkeypress = (event) => {
-  if (application.controlInput.inputActive) {
-    const fn = inputKeyboardEvents['KEY'];
-    const char = String.fromCharCode(event.keyCode);
-    if (CHARS.includes(char) && fn) {
-      fn(char);
-      return false;
-    }
-  }
-  return true;
+  if (!application.controlInput.inputActive) return true;
+  const fn = inputKeyboardEvents.KEY;
+  const char = String.fromCharCode(event.keyCode);
+  if (!CHARS.includes(char) || !fn) return true;
+  fn(char);
+  return false;
 };
 
 const keyboardClick = (e) => {
@@ -184,58 +174,52 @@ const keyboardClick = (e) => {
 };
 
 const uploadFile = async (file) => {
-  // createBlobUploader creates streamId and inits file reader for convenience
   const uploader = application.metacom.createBlobUploader(file);
-  // Prepare backend file consumer
   await api.files.upload({
     streamId: uploader.id,
     name: file.name,
   });
-  // Start uploading stream and wait for its end
   await uploader.upload();
   return { uploadedFile: file };
 };
 
 const downloadFile = async (name, type) => {
-  // Init backend file producer to get streamId
   const { streamId } = await api.files.download({ name });
-  // Get metacom readable stream
   const readable = await application.metacom.getStream(streamId);
-  // Convert stream to blob to make a file on the client
   const blob = await readable.toBlob(type);
   return new File([blob], name);
 };
 
 const saveFile = (fileName, blob) => {
-  const a = document.createElement('a');
-  a.style.display = 'none';
-  document.body.appendChild(a);
+  const link = document.createElement('a');
+  link.style.display = 'none';
+  document.body.appendChild(link);
   const url = window.URL.createObjectURL(blob);
-  a.href = url;
-  a.download = fileName;
-  a.click();
+  link.href = url;
+  link.download = fileName;
+  link.click();
   URL.revokeObjectURL(url);
 };
 
 const upload = () => {
-  const element = document.createElement('form');
-  element.style.visibility = 'hidden';
-  element.innerHTML = '<input id="fileSelect" type="file" multiple />';
-  document.body.appendChild(element);
+  const form = document.createElement('form');
+  form.style.visibility = 'hidden';
+  form.innerHTML = '<input id="fileSelect" type="file" multiple />';
+  document.body.appendChild(form);
   const fileSelect = document.getElementById('fileSelect');
   fileSelect.click();
   fileSelect.onchange = () => {
     const files = Array.from(fileSelect.files);
-    application.print('Uploading ' + files.length + ' file(s)');
+    application.print(`Uploading ${files.length} file(s)`);
     files.sort((a, b) => a.size - b.size);
-    let i = 0;
+    let index = 0;
     const uploadNext = async () => {
-      const file = files[i];
+      const file = files[index];
       await uploadFile(file);
       application.print(`name: ${file.name}, size: ${file.size} done`);
-      i++;
-      if (i < files.length) return uploadNext();
-      document.body.removeChild(element);
+      index++;
+      if (index < files.length) return uploadNext();
+      document.body.removeChild(form);
       commandLoop();
       return null;
     };
@@ -268,8 +252,8 @@ class Keyboard {
 
   show() {
     this.controlKeyboard.style.display = 'block';
-    const down = this.controlKeyboard.offsetHeight + 'px';
-    application.controlBrowse.style.bottom = down;
+    const bottom = `${this.controlKeyboard.offsetHeight}px`;
+    application.controlBrowse.style.bottom = bottom;
   }
 
   hide() {
@@ -301,15 +285,16 @@ class Scroller {
   }
 
   refreshScroll() {
-    this.viewportHeight = application.controlBrowse.offsetHeight;
-    this.contentHeight = application.controlBrowse.scrollHeight;
+    const browse = application.controlBrowse;
+    this.viewportHeight = browse.offsetHeight;
+    this.contentHeight = browse.scrollHeight;
     this.viewableRatio = this.viewportHeight / this.contentHeight;
     this.scrollHeight = this.panelScroll.offsetHeight;
     this.thumbHeight = this.scrollHeight * this.viewableRatio;
-    const top = application.controlBrowse.scrollTop;
+    const top = browse.scrollTop;
     this.thumbPosition = (top * this.thumbHeight) / this.viewportHeight;
-    this.controlScroll.style.top = this.thumbPosition + 'px';
-    this.controlScroll.style.height = this.thumbHeight + 'px';
+    this.controlScroll.style.top = `${this.thumbPosition}px`;
+    this.controlScroll.style.height = `${this.thumbHeight}px`;
   }
 
   scrollBottom() {
@@ -354,8 +339,9 @@ class Application {
       value = pad('*', value.length);
     }
     value = value.replace(/ /g, '&nbsp;');
-    const html = this.controlInput.inputPrompt + value + '<span>&block;</span>';
-    this.controlInput.innerHTML = html;
+    const prompt = this.controlInput.inputPrompt;
+    const cursor = '<span>&block;</span>';
+    this.controlInput.innerHTML = prompt + value + cursor;
   }
 
   input(type, prompt, callback) {
@@ -380,6 +366,12 @@ class Application {
     element.innerHTML = `<a data-text="${text}" class="more">${label}</a>`;
     const [link] = element.querySelectorAll('a');
     link.onclick = moreLink;
+    const top = this.controlBrowse.scrollHeight;
+    this.controlBrowse.scrollTop = top;
+    this.scroller.scrollBottom();
+  }
+
+  scrollToEnd() {
     const top = this.controlBrowse.scrollHeight;
     this.controlBrowse.scrollTop = top;
     this.scroller.scrollBottom();
@@ -433,15 +425,11 @@ class Application {
       } else {
         word += char;
       }
-      const top = this.controlBrowse.scrollHeight;
-      this.controlBrowse.scrollTop = top;
-      this.scroller.scrollBottom();
+      this.scrollToEnd();
     }
     if (i >= text.length) {
       element.innerHTML += '<br/>';
-      const top = this.controlBrowse.scrollHeight;
-      this.controlBrowse.scrollTop = top;
-      this.scroller.scrollBottom();
+      this.scrollToEnd();
     }
     const links = element.querySelectorAll('a');
     for (const link of links) {
@@ -450,15 +438,15 @@ class Application {
   }
 
   async exec(line) {
-    const args = line.split(' ');
-    if (args[0] === 'upload') {
+    const [command] = line.split(' ');
+    if (command === 'upload') {
       upload();
-    } else if (args[0] === 'download') {
+    } else if (command === 'download') {
       const fileName = 'content/home.md';
       const file = await downloadFile(fileName, 'txt/plain');
       console.log({ file });
       saveFile('home.md', file);
-    } else if (args[0] === 'counter') {
+    } else if (command === 'counter') {
       const packet = await api.example.counter();
       this.print(`counter: ${packet.result}`);
     }
@@ -475,7 +463,8 @@ window.addEventListener('load', async () => {
     application.logged = res.status === 'logged';
   }
   if (!application.logged) {
-    const res = await api.auth.signin({ login: 'marcus', password: 'marcus' });
+    const credentials = { login: 'marcus', password: 'marcus' };
+    const res = await api.auth.signin(credentials);
     if (res.token) {
       localStorage.setItem('metarhia.session.token', res.token);
     }

@@ -6,15 +6,20 @@
 
   async saveSession(token, data) {
     console.log({ saveSession: { token, data } });
+    const payload = { data: JSON.stringify(data) };
     try {
-      await db.pg.update('Session', { data: JSON.stringify(data) }, { token });
+      await db.pg.update('Session', payload, { token });
     } catch (error) {
       console.error(error);
     }
   },
 
   async createSession(token, data, fields = {}) {
-    const record = { token, data: JSON.stringify(data), ...fields };
+    const record = {
+      token,
+      data: JSON.stringify(data),
+      ...fields,
+    };
     console.log({ createSession: record });
     return db.pg.insert('Session', record);
   },
@@ -22,7 +27,7 @@
   async readSession(token) {
     const record = await db.pg.row('Session', ['data'], { token });
     console.log({ readSession: { token, record } });
-    if (record && record.data) return record.data;
+    if (record?.data) return record.data;
     return null;
   },
 
