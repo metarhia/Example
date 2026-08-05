@@ -55,18 +55,18 @@
     "node": ">=18"
   },
   "devDependencies": {
-    "@types/node": "^24.12.0",
-    "@types/pg": "^8.20.0",
+    "@types/node": "^24.13.3",
+    "@types/pg": "^8.20.4",
     "@types/ws": "^8.18.1",
-    "eslint": "^9.39.4",
-    "eslint-config-metarhia": "^9.1.8",
-    "prettier": "^3.8.1",
+    "eslint": "^9.39.5",
+    "eslint-config-metarhia": "^9.1.9",
+    "prettier": "^3.9.6",
     "typescript": "^5.9.3"
   },
   "dependencies": {
     "impress": "^3.1.2",
     "metasql": "^3.0.0-alpha.4",
-    "pg": "^8.20.0",
-    "redis": "^5.11.0"
+    "pg": "^8.22.0",
+    "redis": "^5.12.1"
   }
 }
